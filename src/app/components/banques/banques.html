@@ -1,0 +1,69 @@
+<div class="container-fluid">
+
+  <!-- Title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0 font-size-18">Banques</h4>
+        <div class="page-title-right">
+          <button class="btn btn-primary" (click)="openModal(banqueModal)">
+            <i class="bx bx-plus me-1"></i> Ajouter une Banque
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Numéro de Compte</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let banque of banques">
+                <td>{{ banque.name }}</td>
+                <td>{{ banque.num_compte }}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning me-2" (click)="openModal(banqueModal, banque)">Modifier</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteBanque(banque.id)">Supprimer</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <ng-template #banqueModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ selectedBanque.id ? 'Modifier Banque' : 'Nouvelle Banque' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form #banqueForm="ngForm" (ngSubmit)="saveBanque(banqueForm.value)">
+        <div class="mb-3">
+          <label>Nom</label>
+          <input type="text" class="form-control" name="name" [(ngModel)]="formBanque.name" required>
+          <div class="text-danger" *ngIf="errors?.name">{{ errors.name[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Numéro de Compte</label>
+          <input type="text" class="form-control" name="num_compte" [(ngModel)]="formBanque.num_compte" required>
+          <div class="text-danger" *ngIf="errors?.num_compte">{{ errors.num_compte[0] }}</div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">{{ selectedBanque.id ? 'Mettre à jour' : 'Créer' }}</button>
+      </form>
+    </div>
+  </ng-template>
+
+</div>

@@ -1,0 +1,16 @@
+.user-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* max 2 lignes */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 48px; /* ≈ hauteur de 2 lignes */
+}
+
+.email-text {
+  white-space: nowrap;     /* toujours sur une seule ligne */
+  overflow: hidden;        /* cache le reste */
+  text-overflow: ellipsis; /* ajoute "…" à la fin */
+  max-width: 100%;         /* important pour que ça s’applique */
+  display: block;          /* obligatoire si inline */
+}
+

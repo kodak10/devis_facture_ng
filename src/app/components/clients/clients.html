@@ -1,0 +1,89 @@
+<div class="container-fluid">
+
+  <!-- Title -->
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 font-size-18">Clients</h4>
+      <button class="btn btn-primary" (click)="openModal(clientModal)">
+        <i class="bx bx-plus me-1"></i> Ajouter un Client
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Numéro CC</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Ville</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let client of clients">
+                <td>{{ client.nom }}</td>
+                <td>{{ client.numero_cc }}</td>
+                <td>{{ client.telephone }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.ville }}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning me-2" (click)="openModal(clientModal, client)">Modifier</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteClient(client.id)">Supprimer</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <ng-template #clientModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ selectedClient.id ? 'Modifier Client' : 'Nouveau Client' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form #clientForm="ngForm" (ngSubmit)="saveClient(clientForm.value)">
+        <div class="mb-3">
+          <label>Nom</label>
+          <input type="text" class="form-control" name="nom" [(ngModel)]="formClient.nom" required>
+        </div>
+        <div class="mb-3">
+          <label>Numéro CC</label>
+          <input type="text" class="form-control" name="numero_cc" [(ngModel)]="formClient.numero_cc" required>
+        </div>
+        <div class="mb-3">
+          <label>Téléphone</label>
+          <input type="text" class="form-control" name="telephone" [(ngModel)]="formClient.telephone">
+        </div>
+        <div class="mb-3">
+          <label>Email</label>
+          <input type="email" class="form-control" name="email" [(ngModel)]="formClient.email">
+        </div>
+        <div class="mb-3">
+          <label>Adresse</label>
+          <input type="text" class="form-control" name="adresse" [(ngModel)]="formClient.adresse">
+        </div>
+        <div class="mb-3">
+          <label>Ville</label>
+          <input type="text" class="form-control" name="ville" [(ngModel)]="formClient.ville">
+        </div>
+        <div class="mb-3">
+          <label>ATTN</label>
+          <input type="text" class="form-control" name="attn" [(ngModel)]="formClient.attn">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">{{ selectedClient.id ? 'Mettre à jour' : 'Créer' }}</button>
+      </form>
+    </div>
+  </ng-template>
+
+</div>

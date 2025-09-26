@@ -1,0 +1,176 @@
+<div class="container-fluid">
+
+  <!-- start page title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0 font-size-18">Utilisateurs</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a href="javascript:void(0);">Utilisateurs</a></li>
+            <li class="breadcrumb-item active">Utilisateurs</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end page title -->
+
+  <!-- actions -->
+  <div class="row align-items-center mb-3">
+    <div class="col-md-6">
+      <h5 class="card-title">Nombre d'utilisateurs <span class="text-muted fw-normal ms-2">({{ totalUsers }})</span></h5>
+    </div>
+    <div class="col-md-6 text-end">
+      <button class="btn btn-light" (click)="openModal(userModal)"><i class="bx bx-plus me-1"></i> Ajouter un Utilisateur</button>
+    </div>
+  </div>
+
+  <div class="row">
+  <!-- Skeletons -->
+  <ng-container *ngIf="isLoading">
+    <div class="col-xl-3 col-sm-6 mb-4" *ngFor="let skel of [1,2,3,4]">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="mx-auto mb-3">
+            <div class="avatar-xl rounded-circle bg-light placeholder"></div>
+          </div>
+          <h5 class="font-size-16 mb-1">
+            <span class="placeholder col-6"></span>
+          </h5>
+          <p class="text-muted mb-2">
+            <span class="placeholder col-8"></span>
+          </p>
+          <p>
+            <span class="placeholder col-4"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Users list -->
+  <ng-container *ngIf="!isLoading">
+    <div class="col-xl-3 col-sm-6 mb-4" *ngFor="let user of users">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="mx-auto mb-3">
+            <img *ngIf="user.image" [src]="user.image" alt="" class="avatar-xl rounded-circle img-thumbnail">
+            <div *ngIf="!user.image" class="avatar-xl mx-auto mb-3">
+              <div class="avatar-title bg-light-subtle text-light display-4 m-0 rounded-circle">
+                <i class="bx bxs-user-circle"></i>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="font-size-16 mb-1">
+            <a href="#" class="text-body user-name">{{ user.name }}</a>
+          </h5>
+          <p class="text-muted mb-2 text-truncate email-text">{{ user.email }}</p>
+          <p class="badge bg-primary-subtle text-primary mb-2">
+            <small *ngFor="let role of user.roles">{{ role.name }} </small>
+          </p>
+        </div>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-outline-light text-truncate" (click)="openModal(userModal, user)">Modifier</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+
+ 
+
+  <!-- pagination -->
+  <div class="row g-0 align-items-center mb-4">
+    <div class="col-sm-6">
+      <p class="mb-sm-0">Affichage {{ users.length }} sur {{ totalUsers }} Utilisateurs</p>
+    </div>
+    <div class="col-sm-6">
+      <div class="float-sm-end">
+        <ul class="pagination mb-sm-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+                <button class="page-link" type="button" (click)="loadUsers(currentPage - 1)">
+                <i class="mdi mdi-chevron-left"></i>
+                </button>
+            </li>
+
+            <li class="page-item" *ngFor="let page of pages" [class.active]="page === currentPage">
+                <button class="page-link" type="button" (click)="loadUsers(page)">
+                {{ page }}
+                </button>
+            </li>
+
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <button class="page-link" type="button" (click)="loadUsers(currentPage + 1)">
+                <i class="mdi mdi-chevron-right"></i>
+                </button>
+            </li>
+            </ul>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- modal for create/edit -->
+  <ng-template #userModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ selectedUser ? "Modification d'Utilisateur" : 'Nouveau Utilisateur' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form #userForm="ngForm" (ngSubmit)="saveUser(userForm.value)">
+        <div class="mb-3">
+          <label>Name</label>
+          <input type="text" class="form-control" name="name" [(ngModel)]="formUser.name" required>
+          <div class="text-danger" *ngIf="errors?.name">{{ errors.name[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Email</label>
+          <input type="email" class="form-control" name="email" [(ngModel)]="formUser.email" required>
+          <div class="text-danger" *ngIf="errors?.email">{{ errors.email[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Phone</label>
+          <input type="text" class="form-control" name="phone" [(ngModel)]="formUser.phone">
+          <div class="text-danger" *ngIf="errors?.phone">{{ errors.phone[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Adresse</label>
+          <input type="text" class="form-control" name="adresse" [(ngModel)]="formUser.adresse">
+          <div class="text-danger" *ngIf="errors?.adresse">{{ errors.adresse[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Pays</label>
+          <select class="form-control" name="pays_id" [(ngModel)]="formUser.pays_id">
+            <option *ngFor="let pays of countries" [value]="pays.id">{{ pays.name }}</option>
+          </select>
+          <div class="text-danger" *ngIf="errors?.pays_id">{{ errors.pays_id[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Statut</label>
+          <select class="form-control" name="statut" [(ngModel)]="formUser.statut">
+            <option [value]="1">Actif</option>
+            <option [value]="0">Inactif</option>
+          </select>
+          <div class="text-danger" *ngIf="errors?.statut">{{ errors.statut[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Roles</label>
+          <select class="form-control" name="roles" [(ngModel)]="formUser.roles" multiple>
+            <option *ngFor="let role of roles" [value]="role.name">{{ role.name }}</option>
+          </select>
+          <div class="text-danger" *ngIf="errors?.roles">{{ errors.roles[0] }}</div>
+        </div>
+        <div class="mb-3">
+          <label>Image</label>
+          <input type="file" class="form-control" (change)="onFileChange($event)">
+          <div class="text-danger" *ngIf="errors?.image">{{ errors.image[0] }}</div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">{{ selectedUser ? 'Update' : 'Create' }}</button>
+      </form>
+    </div>
+  </ng-template>
+
+</div>

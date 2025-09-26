@@ -24,13 +24,36 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/favicon.ico",
+              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
               }
+              
             ],
             "styles": [
-              "src/styles.scss"
+              "src/assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css",
+              "src/assets/css/preloader.min.css",
+              "src/assets/css/bootstrap.min.css",
+              "src/assets/css/icons.min.css",
+              "src/assets/css/app.min.css",
+              "node_modules/datatables.net-dt/css/dataTables.dataTables.css"
+
+
+            ],
+            "scripts": [
+              "src/assets/libs/simplebar/simplebar.min.js",
+              "src/assets/libs/node-waves/waves.min.js",
+              "src/assets/libs/feather-icons/feather.min.js",
+              "src/assets/libs/pace-js/pace.min.js",
+              "src/assets/libs/apexcharts/apexcharts.min.js",
+              "src/assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js",
+              "src/assets/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-world-mill-en.js",
+              "src/assets/js/pages/dashboard.init.js",
+              "src/assets/js/app.js",
+              "node_modules/datatables.net/js/jquery.dataTables.js"
+
             ]
           },
           "configurations": {
