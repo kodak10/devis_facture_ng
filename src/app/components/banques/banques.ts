@@ -53,18 +53,24 @@ export class BanquesComponent implements OnInit {
   saveBanque(formData: any) {
     const payload = { ...this.selectedBanque, ...formData };
 
-    if (this.selectedBanque.id) {
-      this.banqueService.updateBanque(payload).subscribe({
-        next: () => this.loadBanques(),
-        error: (err) => (this.errors = err.error.errors)
-      });
-    } else {
-      this.banqueService.createBanque(payload).subscribe({
-        next: () => this.loadBanques(),
-        error: (err) => (this.errors = err.error.errors)
-      });
-    }
+    const request = this.selectedBanque.id
+      ? this.banqueService.updateBanque(payload)
+      : this.banqueService.createBanque(payload);
+
+    request.subscribe({
+      next: () => {
+        // Fermer le modal
+        this.modalService.dismissAll();
+
+        // Recharger la liste
+        this.loadBanques();
+      },
+      error: (err) => {
+        this.errors = err.error.errors;
+      }
+    });
   }
+
 
   deleteBanque(id?: number) {
     if (!id) return;
