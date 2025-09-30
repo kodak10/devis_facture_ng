@@ -53,20 +53,29 @@ export class ClientsComponent implements OnInit {
   }
 
   saveClient(formData: any) {
-    const payload = { ...this.selectedClient, ...formData };
+  const payload = { ...this.selectedClient, ...formData };
 
-    if (this.selectedClient.id) {
-      this.clientService.updateClient(payload).subscribe({
-        next: () => this.loadClients(),
-        error: (err) => (this.errors = err.error.errors)
-      });
-    } else {
-      this.clientService.createClient(payload).subscribe({
-        next: () => this.loadClients(),
-        error: (err) => (this.errors = err.error.errors)
-      });
+  const request = this.selectedClient.id
+    ? this.clientService.updateClient(payload)
+    : this.clientService.createClient(payload);
+
+  request.subscribe({
+    next: () => {
+      // Fermer la modal
+      this.modalService.dismissAll();
+
+      // Recharger la liste
+      this.loadClients();
+
+      // Réinitialiser les erreurs
+      this.errors = {};
+    },
+    error: (err) => {
+      this.errors = err.error.errors;
     }
-  }
+  });
+}
+
 
   deleteClient(id?: number) {
     if (!id) return;
