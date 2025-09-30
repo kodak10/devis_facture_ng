@@ -27,6 +27,14 @@ export const routes: Routes = [
         path: 'designations',
         loadChildren: () => import('./components/designations/designations.routes').then(m => m.DESIGNATION_ROUTES)
     },
+    {
+        path: 'devis',
+        loadChildren: () => import('./components/devis/devis-list/devis-list/devis_list.routes').then(m => m.DEVIS_LIST_ROUTES)
+    },
+    {
+        path: 'devis/create',
+        loadChildren: () => import('./components/devis/devis-create/devis-create/devis-create.routes').then(m => m.DEVIS_CREATE_ROUTES)
+    },
     // { 
     //     path: 'devis', 
     //     loadChildren: () => import('./components/devis/devis.routes').then(m => m.DEVIS_ROUTES)

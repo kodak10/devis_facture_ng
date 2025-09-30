@@ -14,7 +14,7 @@
         <thead>
           <tr>
             <th>Reference</th>
-            <th>Description</th>
+            <th>Libellé</th>
             <th>Prix Unitaire</th>
             <th>Actions</th>
           </tr>
@@ -22,18 +22,14 @@
         <tbody>
           <tr *ngFor="let d of designations">
             <td>{{ d.reference }}</td>
-            <td>{{ d.description }}</td>
-            <td>{{ d.prix_unitaire | number:'1.2-2' }} €</td>
+            <td>{{ d.libelle }}</td>
+            <td>{{ d.prix_unitaire | number:'1.2-2' }}</td>
             <td>
-              <div class="btn-group" role="group">
-                <button class="btn btn-warning btn-sm me-1" 
-                        (click)="openModal(designationModal, d)"
-                        title="Modifier">
+              <div class="btn-group">
+                <button class="btn btn-warning btn-sm me-1" (click)="openModal(designationModal, d)">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-danger btn-sm" 
-                        (click)="deleteDesignation(d.id)"
-                        title="Supprimer">
+                <button class="btn btn-danger btn-sm" (click)="deleteDesignation(d.id)">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -50,36 +46,37 @@
       <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
     </div>
     <div class="modal-body">
+      <div *ngIf="generalError" class="alert alert-danger">
+        {{ generalError }}
+      </div>
       <form #form="ngForm" (ngSubmit)="saveDesignation(form.value)">
         <div class="mb-3">
           <label class="form-label">Reference</label>
-          <input type="text" class="form-control" name="reference" 
-                 [(ngModel)]="formDesignation.reference" required>
-          <div *ngIf="errors?.reference" class="text-danger small">
-            {{ errors.reference[0] }}
-          </div>
+          <input type="text" class="form-control" name="reference" [(ngModel)]="formDesignation.reference" required>
+          <div *ngIf="errors?.reference" class="text-danger small">{{ errors.reference[0] }}</div>
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Libellé</label>
+          <input type="text" class="form-control" name="libelle" [(ngModel)]="formDesignation.libelle" required>
+          <div *ngIf="errors?.libelle" class="text-danger small">{{ errors.libelle[0] }}</div>
+        </div>
+
         <div class="mb-3">
           <label class="form-label">Description</label>
-          <textarea class="form-control" name="description" 
-                    [(ngModel)]="formDesignation.description" rows="3"></textarea>
-          <div *ngIf="errors?.description" class="text-danger small">
-            {{ errors.description[0] }}
-          </div>
+          <textarea class="form-control" name="description" [(ngModel)]="formDesignation.description" rows="3"></textarea>
+          <div *ngIf="errors?.description" class="text-danger small">{{ errors.description[0] }}</div>
         </div>
+
         <div class="mb-3">
           <label class="form-label">Prix Unitaire</label>
-          <input type="number" step="0.01" class="form-control" name="prix_unitaire" 
-                 [(ngModel)]="formDesignation.prix_unitaire" required>
-          <div *ngIf="errors?.prix_unitaire" class="text-danger small">
-            {{ errors.prix_unitaire[0] }}
-          </div>
+          <input type="number" step="0.01" class="form-control" name="prix_unitaire" [(ngModel)]="formDesignation.prix_unitaire" required>
+          <div *ngIf="errors?.prix_unitaire" class="text-danger small">{{ errors.prix_unitaire[0] }}</div>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Annuler</button>
-          <button type="submit" class="btn btn-primary">
-            {{ selectedDesignation.id ? 'Mettre à jour' : 'Créer' }}
-          </button>
+          <button type="submit" class="btn btn-primary">{{ selectedDesignation.id ? 'Mettre à jour' : 'Créer' }}</button>
         </div>
       </form>
     </div>

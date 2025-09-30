@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { EntrepriseService, Entreprise } from '../../services/entreprise.service';
+import { ConfigurationGeneraleService, ConfigurationGenerale } from '../../services/configuration.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
-
 
 @Component({
   selector: 'app-configuration-generale',
@@ -14,7 +13,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./configuration-generale.scss']
 })
 export class ConfigurationGeneraleComponent implements OnInit {
-  entreprise: Entreprise = {
+  configuration: ConfigurationGenerale = {
     nom: '',
     logo: '',
     contact: '',
@@ -24,31 +23,51 @@ export class ConfigurationGeneraleComponent implements OnInit {
   };
 
   errors: any = {};
+  globalError: string | null = null;
+  logoFile?: File;
 
   constructor(
-    private service: EntrepriseService,
+    private service: ConfigurationGeneraleService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
-    this.service.getEntreprise().subscribe(data => {
-      this.entreprise = data;
+    this.service.getConfigurationGenerale().subscribe({
+      next: (data) => this.configuration = data,
+      error: (err) => this.globalError = 'Impossible de charger la configuration.'
     });
   }
+
+  onFileChange(event: any) {
+  if (event.target.files && event.target.files.length > 0) {
+    this.logoFile = event.target.files[0];
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => this.configuration.logo = e.target.result;
+    if (this.logoFile) {
+      reader.readAsDataURL(this.logoFile);
+    }
+  }
+}
 
   onSubmit(form: NgForm) {
-    if (!form.valid) return;
+  if (!form.valid) return;
 
-    this.service.updateEntreprise(this.entreprise).subscribe({
-      next: () => {
-        this.errors = {};
-        this.toastr.success('Entreprise mise à jour avec succès !', 'Succès');
-      },
-      error: (err) => {
-        if (err.status === 422) {
-          this.errors = err.error.errors; // messages de validation Laravel
-        }
+  this.service.updateConfigurationGenerale(this.configuration, this.logoFile).subscribe({
+    next: (res) => {
+      this.toastr.success(res.message, 'Succès');
+      this.errors = {};
+      this.globalError = null;
+      this.configuration = res.config;
+    },
+    error: (err) => {
+      if (err.status === 422) {
+        this.errors = err.error.errors;
+        this.globalError = err.error.message || 'Erreur de validation';
+      } else {
+        this.globalError = 'Une erreur est survenue, veuillez réessayer.';
       }
-    });
-  }
+    }
+  });
+}
 }

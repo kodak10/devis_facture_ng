@@ -24,65 +24,71 @@
                                 <div class="card">
                                     
                                     <div class="card-body">
-                                        <form #entrepriseForm="ngForm" (ngSubmit)="onSubmit(entrepriseForm)">
+                                        <div *ngIf="globalError" class="alert alert-danger">
+                                            {{ globalError }}
+                                        </div>
+                                        <form #entrepriseForm="ngForm" (ngSubmit)="onSubmit(entrepriseForm)" enctype="multipart/form-data">
 
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Nom de l'entreprise</label>
-                                                    <input type="text" class="form-control" [(ngModel)]="entreprise.nom" name="nom" required>
-                                                    <div class="text-danger" *ngIf="errors?.nom">{{ errors.nom[0] }}</div>
-                                                </div>
-                                                </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">Nom de l'entreprise</label>
+        <input type="text" class="form-control" [(ngModel)]="configuration.nom" name="nom" required>
+        <div class="text-danger" *ngIf="errors?.nom">{{ errors.nom[0] }}</div>
+      </div>
+    </div>
 
-                                                <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Logo</label>
-                                                    <input type="text" class="form-control" [(ngModel)]="entreprise.logo" name="logo" required>
-                                                    <div class="text-danger" *ngIf="errors?.logo">{{ errors.logo[0] }}</div>
-                                                    <img [src]="entreprise.logo" alt="Logo" style="max-height:50px; margin-top:5px;">
-                                                </div>
-                                                </div>
-                                            </div>
+    <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">Logo</label>
+        <input type="file" (change)="onFileChange($event)">
+<img [src]="configuration.logo" *ngIf="configuration.logo" style="max-height:50px; margin-top:5px;">
 
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Contact</label>
-                                                    <input type="text" class="form-control" [(ngModel)]="entreprise.contact" name="contact" required>
-                                                    <div class="text-danger" *ngIf="errors?.contact">{{ errors.contact[0] }}</div>
-                                                </div>
-                                                </div>
+        <div class="text-danger" *ngIf="errors?.logo">{{ errors.logo[0] }}</div>
+      </div>
+    </div>
+  </div>
 
-                                                <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">RCCM</label>
-                                                    <input type="text" class="form-control" [(ngModel)]="entreprise.ncc" name="rccm" required>
-                                                    <div class="text-danger" *ngIf="errors?.rccm">{{ errors.rccm[0] }}</div>
-                                                </div>
-                                                </div>
-                                            </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">Contact</label>
+        <input type="text" class="form-control" [(ngModel)]="configuration.contact" name="contact" required>
+        <div class="text-danger" *ngIf="errors?.contact">{{ errors.contact[0] }}</div>
+      </div>
+    </div>
 
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Adresse</label>
-                                                    <input type="text" class="form-control" [(ngModel)]="entreprise.adresse" name="adresse" required>
-                                                    <div class="text-danger" *ngIf="errors?.adresse">{{ errors.adresse[0] }}</div>
-                                                </div>
-                                                </div>
+    <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">RCCM</label>
+        <input type="text" class="form-control" [(ngModel)]="configuration.ncc" name="rccm" required>
+        <div class="text-danger" *ngIf="errors?.rccm">{{ errors.rccm[0] }}</div>
+      </div>
+    </div>
+  </div>
 
-                                                <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Email</label>
-                                                    <input type="email" class="form-control" [(ngModel)]="entreprise.email" name="email" required>
-                                                    <div class="text-danger" *ngIf="errors?.email">{{ errors.email[0] }}</div>
-                                                </div>
-                                                </div>
-                                            </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">Adresse</label>
+        <input type="text" class="form-control" [(ngModel)]="configuration.adresse" name="adresse" required>
+        <div class="text-danger" *ngIf="errors?.adresse">{{ errors.adresse[0] }}</div>
+      </div>
+    </div>
 
-                                            <button type="submit" class="btn btn-primary">Mettre à Jour</button>
-                                            </form>
+    <div class="col-lg-6">
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" [(ngModel)]="configuration.email" name="email" required>
+        <div class="text-danger" *ngIf="errors?.email">{{ errors.email[0] }}</div>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Mettre à Jour</button>
+
+</form>
+
 
 
                                     </div>

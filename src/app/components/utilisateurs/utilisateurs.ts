@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { UtilisateurService, User } from '../../services/utilisateur.service';
-import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+declare var $: any;
 
 @Component({
   selector: 'app-utilisateurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbModalModule],
+  imports: [CommonModule, FormsModule, NgbModalModule, NgbToast],
   templateUrl: './utilisateurs.html',
   styleUrls: ['./utilisateurs.scss']
 })
@@ -15,20 +17,52 @@ export class UtilisateursComponent implements OnInit {
   users: User[] = [];
   currentPage = 1;
   totalPages = 1;
-  totalUsers = 0; // ajouté
-  pages: number[] = []; // ajouté
-  selectedUser: User = {} as User; // éviter le ?. dans ngModel
+  totalUsers = 0;
+  pages: number[] = [];
+  selectedUser: User = {} as User;
   errors: any = {};
-  countries: any[] = []; // à remplir si nécessaire
-  roles: any[] = []; // à remplir si nécessaire
-
-  formUser: User = {} as User;
+  countries: any[] = [];
+  roles: any[] = [];
   isLoading = true;
+  formUser: any = {};
+
+  // Toast
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
+
+  rolesSelect2Instance: any = null;
+  paysSelect2Instance: any = null;
 
   constructor(private utilisateurService: UtilisateurService, private modalService: NgbModal) {}
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadRoles();
+    this.loadPays();
+  }
+
+  showNotification(message: string, type: 'success' | 'error' = 'success') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    // cacher après 5 secondes
+    setTimeout(() => {
+      this.showToast = false;
+    }, 5000);
+  }
+
+  loadRoles() {
+    this.utilisateurService.getRoles().subscribe(res => {
+      this.roles = res;
+    });
+  }
+
+  loadPays() {
+    this.utilisateurService.getPays().subscribe(res => {
+      this.countries = res;
+    });
   }
 
   loadUsers(page: number = 1) {
@@ -46,52 +80,155 @@ export class UtilisateursComponent implements OnInit {
       }
     });
   }
-  // loadUsers(page: number = 1) {
-  //   if (page < 1 || (this.totalPages && page > this.totalPages)) return;
-
-  //   this.utilisateurService.getUsers(page).subscribe(res => {
-  //     this.users = res.data;
-  //     this.currentPage = res.current_page;
-  //     this.totalPages = res.last_page;
-  //     this.totalUsers = res.total; // récupère le total depuis ton API
-
-  //     // Générer un tableau pour la pagination
-  //     this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  //   });
-  // }
 
   openModal(content: any, user: User | null = null) {
+    this.destroySelect2();
+
     this.selectedUser = user ? { ...user } : {} as User;
-    this.formUser = { ...this.selectedUser }; // copie pour le formulaire
-    this.modalService.open(content, { size: 'lg' });
+    this.formUser = { ...this.selectedUser };
     this.errors = {};
+
+    const modalRef = this.modalService.open(content, { 
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    // Réinitialiser Select2 après l'ouverture de la modal
+    setTimeout(() => {
+      this.initializeSelect2();
+      this.setSelect2Values();
+    }, 100);
+
+    // Nettoyer lors de la fermeture
+    modalRef.result.finally(() => {
+      this.destroySelect2();
+    });
   }
 
-  saveUser(formData: any) {
-    const payload = { ...this.selectedUser, ...formData };
-
-    if (this.selectedUser.id) {
-      this.utilisateurService.updateUser(payload).subscribe({
-        next: () => this.loadUsers(),
-        error: (err) => (this.errors = err.error.errors)
+  initializeSelect2() {
+    const rolesElement = $('#roles');
+    if (rolesElement.length && !rolesElement.hasClass('select2-hidden-accessible')) {
+      this.rolesSelect2Instance = rolesElement.select2({
+        width: '100%',
+        placeholder: 'Sélectionnez les rôles',
+        allowClear: true,
+        multiple: true,
+        dropdownParent: $('.modal-content') // Important pour le z-index dans les modals
       });
-    } else {
-      this.utilisateurService.createUser(payload).subscribe({
-        next: () => this.loadUsers(),
-        error: (err) => (this.errors = err.error.errors)
+
+      this.rolesSelect2Instance.on('change', (e: any) => {
+        this.formUser.roles = $(e.target).val();
+      });
+    }
+
+    const paysElement = $('#pays_id');
+    if (paysElement.length && !paysElement.hasClass('select2-hidden-accessible')) {
+      this.paysSelect2Instance = paysElement.select2({
+        width: '100%',
+        placeholder: 'Sélectionnez un pays',
+        dropdownParent: $('.modal-content')
+      });
+
+      this.paysSelect2Instance.on('change', (e: any) => {
+        this.formUser.pays_id = $(e.target).val();
       });
     }
   }
 
+  destroySelect2() {
+    try {
+      if (this.rolesSelect2Instance) {
+        const rolesElement = $('#roles');
+        if (rolesElement.hasClass('select2-hidden-accessible')) {
+          rolesElement.select2('destroy');
+        }
+        this.rolesSelect2Instance = null;
+      }
+
+      if (this.paysSelect2Instance) {
+        const paysElement = $('#pays_id');
+        if (paysElement.hasClass('select2-hidden-accessible')) {
+          paysElement.select2('destroy');
+        }
+        this.paysSelect2Instance = null;
+      }
+
+      $('.select2-container').remove();
+      
+    } catch (error) {
+      console.log('Erreur lors du nettoyage Select2:', error);
+    }
+  }
+
+  setSelect2Values() {
+    // Définir les valeurs pour les rôles
+    if (this.formUser.roles) {
+      const roleNames = this.formUser.roles.map((role: any) => 
+        typeof role === 'object' ? role.name : role
+      );
+      $('#roles').val(roleNames).trigger('change');
+    }
+
+    // Définir la valeur pour le pays
+    if (this.formUser.pays_id) {
+      $('#pays_id').val(this.formUser.pays_id.toString()).trigger('change');
+    }
+  }
+
+  saveUser(formData: any) {
+    // Préparer le payload
+    const payload = {
+      ...this.selectedUser,
+      ...formData,
+      roles: this.formUser.roles || [],
+      pays_id: this.formUser.pays_id || null
+    };
+
+    console.log('Payload envoyé :', payload);
+
+    const request = this.selectedUser.id 
+      ? this.utilisateurService.updateUser(payload)
+      : this.utilisateurService.createUser(payload);
+
+    request.subscribe({
+      next: (res) => {
+        console.log(this.selectedUser.id ? 'Update réussi :' : 'Création réussie :', res);
+        this.modalService.dismissAll();
+        this.loadUsers();
+        this.showNotification(
+          this.selectedUser.id 
+            ? 'Utilisateur modifié avec succès' 
+            : 'Utilisateur créé avec succès',
+          'success'
+        );
+      },
+      error: (err) => {
+        console.error('Erreur :', err);
+        this.errors = err.error.errors;
+        this.showNotification(
+          'Erreur lors de l\'opération',
+          'error'
+        );
+      }
+    });
+  }
 
   deleteUser(userId?: number) {
-    if (!userId) return; // ignorer si undefined
-    if (!confirm('Are you sure?')) return;
-    this.utilisateurService.deleteUser(userId).subscribe(() => this.loadUsers());
+    if (!userId) return;
+    
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
+    
+    this.utilisateurService.deleteUser(userId).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.showNotification('Utilisateur supprimé avec succès', 'success');
+      },
+      error: (err) => {
+        console.error('Erreur suppression:', err);
+        this.showNotification('Erreur lors de la suppression', 'error');
+      }
+    });
   }
 
-
-  onFileChange(event: any) {
-    // gérer l'image ici
-  }
 }

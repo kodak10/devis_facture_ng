@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface Designation {
   id?: number;
   reference: string;
+  libelle: string;
   description?: string;
   prix_unitaire: number;
 }
@@ -30,4 +31,6 @@ export class DesignationService {
   deleteDesignation(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+  
+
 }

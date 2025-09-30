@@ -1,1 +1,3 @@
 ng generate component produits --standalone --skip-tests
+
+ng serve --configuration development --open

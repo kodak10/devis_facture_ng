@@ -8,11 +8,16 @@ export interface Role {
   guard_name?: string;
 }
 
+export interface Pays {
+  id: number;
+  name: string;
+}
+
 export interface User {
   id?: number;
   name: string;
   email: string;
-  statut: boolean;
+  status: boolean;
   pays_id?: number;
   phone?: string;
   adresse?: string;
@@ -29,6 +34,15 @@ export class UtilisateurService {
   getUsers(page: number = 1): Observable<any> {
     return this.http.get(`${this.apiUrl}?page=${page}`);
   }
+
+  getRoles(): Observable<Role[]> {
+    return this.http.get<Role[]>('http://localhost:8000/api/roles');
+  }
+
+  getPays(): Observable<Pays[]> {
+    return this.http.get<Pays[]>('http://localhost:8000/api/pays');
+  }
+
 
   createUser(user: User): Observable<User> {
     return this.http.post<User>(this.apiUrl, user);
