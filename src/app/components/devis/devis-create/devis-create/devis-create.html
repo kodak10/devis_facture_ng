@@ -1,1 +1,361 @@
-<p>devis-create works!</p>
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Création de Devis</h4>
+    </div>
+    <div class="card-body">
+
+      <!-- Indicateur d'étapes -->
+      <div class="steps-indicator mb-4">
+        <div class="d-flex justify-content-center">
+          <div class="step-item" [class.active]="step === 1" [class.completed]="step > 1">
+            <div class="step-icon">
+              <i class="fas fa-edit"></i>
+            </div>
+            <div class="step-label">Saisie</div>
+          </div>
+          <div class="step-connector" [class.completed]="step > 1"></div>
+          <div class="step-item" [class.active]="step === 2" [class.completed]="step > 2">
+            <div class="step-icon">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div class="step-label">Aperçu</div>
+          </div>
+          <div class="step-connector" [class.completed]="step > 2"></div>
+          <div class="step-item" [class.active]="step === 3">
+            <div class="step-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <div class="step-label">Confirmation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Étape 1 : Saisie -->
+      <div *ngIf="step === 1">
+        <div class="row">
+          <div class="col-lg-4">
+            <label class="form-label">Date d'émission <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="dateDemission" (change)="errors.dateDemission = ''">
+            <div class="invalid-feedback" *ngIf="errors.dateDemission">
+              {{ errors.dateDemission }}
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label">Date d'échéance <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [class.is-invalid]="errors.dateEcheance" 
+                   [(ngModel)]="dateEcheance" (change)="errors.dateEcheance = ''">
+            <div class="invalid-feedback" *ngIf="errors.dateEcheance">
+              {{ errors.dateEcheance }}
+            </div>
+          </div>
+         
+          <div class="col-lg-4">
+            <label class="form-label">Client <span class="text-danger">*</span></label>
+            <select class="form-select" [class.is-invalid]="errors.clientId" 
+                    [(ngModel)]="clientId" (change)="errors.clientId = ''">
+              <option [ngValue]="null">-- Choisir Client --</option>
+              <option *ngFor="let c of clients" [ngValue]="c.id">{{c.nom}}</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="errors.clientId">
+              {{ errors.clientId }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-lg-3">
+            <label class="form-label">Devise Départ</label>
+            <select class="form-select" [(ngModel)]="deviseDepart" (change)="onDeviseDepartChange()">
+              <option *ngFor="let d of devises" [value]="d.code">{{d.code}} - {{d.nom}}</option>
+            </select>
+          </div>
+          <div class="col-lg-3">
+            <label class="form-label">Devise Devis</label>
+            <select class="form-select" [(ngModel)]="devise" (change)="onDeviseChange()">
+              <option *ngFor="let d of devises" [value]="d.code">{{d.code}} - {{d.nom}}</option>
+            </select>
+          </div>
+          <div class="col-lg-3 mt-2">
+             <small class="text-muted">{{ getTauxDisplay() }}</small>
+            <div class="d-flex align-items-center gap-2">
+              <input type="number" class="form-control" [(ngModel)]="taux" 
+                     (input)="updateAllPricesWithTaux()" [readonly]="tauxAuto" 
+                     step="0.0001" min="0.0001">
+              
+           
+
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="tauxAuto" 
+                       (change)="calculateTaux()">
+                <label class="form-check-label">Auto</label>
+              </div>
+            </div>
+
+            <!-- <small class="text-muted">1 {{deviseDepart}} = {{taux}} {{devise}}</small> -->
+          </div>
+          <div class="col-lg-3">
+            <label class="form-label">Banque <span class="text-danger">*</span></label>
+            <select class="form-select" [(ngModel)]="banqueId">
+              <option [ngValue]="null">-- Choisir Banque --</option>
+              <option *ngFor="let b of banques" [ngValue]="b.id">{{b.name}}</option>
+            </select>
+          </div>
+        </div>
+
+        <hr>
+
+        <h5>Lignes de produits ou services <span class="text-danger">*</span></h5>
+        <div *ngIf="errors.lignes" class="alert alert-danger">
+          {{ errors.lignes }}
+        </div>
+        
+        <div *ngFor="let ligne of lignes; let i = index" class="row mb-2 align-items-center">
+  <div class="col-lg-3">
+    <select class="form-select" [class.is-invalid]="errors['ligne_' + i + '_designation']" 
+            [(ngModel)]="ligne.designationId" 
+            (change)="onDesignationChange(ligne, i)">
+      <option [ngValue]="null">-- Désignation --</option>
+      <option *ngFor="let d of designations" [ngValue]="d.id" [attr.data-prix]="d.prix_unitaire">
+        {{d.libelle}}
+      </option>
+    </select>
+    <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_designation']">
+      {{ errors['ligne_' + i + '_designation'] }}
+    </div>
+  </div>
+  <div class="col-lg-1">
+    <input type="number" class="form-control" [class.is-invalid]="errors['ligne_' + i + '_quantite']" 
+           placeholder="Qté" [(ngModel)]="ligne.quantite" (input)="onLineChange()" min="1">
+    <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_quantite']">
+      {{ errors['ligne_' + i + '_quantite'] }}
+    </div>
+  </div>
+  <div class="col-lg-2">
+    <input type="number" class="form-control" [class.is-invalid]="errors['ligne_' + i + '_prix']" 
+           placeholder="Prix Unitaire" [(ngModel)]="ligne.prix" (input)="onLineChange()" step="0.01" min="0">
+    <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_prix']">
+      {{ errors['ligne_' + i + '_prix'] }}
+    </div>
+  </div>
+  <div class="col-lg-1">
+    <input type="number" class="form-control" placeholder="Remise %" 
+           [(ngModel)]="ligne.remise" (input)="onLineChange()" min="0" max="100" step="0.01">
+  </div>
+  <div class="col-lg-2">
+    <input type="number" class="form-control" placeholder="PU Net" 
+           [value]="ligne.prixNet || 0" readonly>
+  </div>
+  <div class="col-lg-2">
+    <input type="number" class="form-control" placeholder="Total" 
+           [value]="ligne.total || 0" readonly>
+  </div>
+  <div class="col-lg-1">
+    <button class="btn btn-danger btn-sm" (click)="removeLine(i)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary mt-2" (click)="addLine()">
+          <i class="fas fa-plus"></i> Ajouter une ligne
+        </button>
+
+        <hr>
+
+        <h5>Conditions financières</h5>
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-4">
+                    <label class="form-label">Commande (%)</label>
+                    <input type="number" class="form-control" [(ngModel)]="commande" 
+                           (input)="onCommandeChange()" min="0" max="100">
+                  </div>
+                  <div class="col-lg-4">
+                    <label class="form-label">Livraison (%)</label>
+                    <input type="number" class="form-control" [(ngModel)]="livraison" 
+                           (input)="onLivraisonChange()" min="0" max="100">
+                  </div>
+                  <div class="col-lg-4">
+                    <label class="form-label">Validité (jours)</label>
+                    <input type="number" class="form-control" [(ngModel)]="validiteOffre" min="1">
+                  </div>
+                  <div class="col-lg-4 mt-2">
+                    <label class="form-label">Délai de livraison</label>
+                    <input type="number" class="form-control" [(ngModel)]="delaiJours" min="1" 
+                           *ngIf="delaiType === 'jours'">
+                    <input type="text" class="form-control" value="Déjà livré" readonly 
+                           *ngIf="delaiType === 'deja_livre'">
+                    <input type="text" class="form-control" value="Selon planning du client" readonly 
+                           *ngIf="delaiType === 'planning'">
+                  </div>
+                  <div class="col-lg-8 mt-2">
+                    <div class="row">
+                      <div class="col-lg-4">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" [(ngModel)]="delaiType">
+                          <option value="jours">Nbre Jours</option>
+                          <option value="deja_livre">Déjà Livré</option>
+                          <option value="planning">Planning Client</option>
+                          <option value="periode">Période</option>
+                        </select>
+                      </div>
+                      <div class="col-lg-4" *ngIf="delaiType === 'periode'">
+                        <label class="form-label">DE</label>
+                        <input type="number" class="form-control" [(ngModel)]="delaiDe" min="0">
+                      </div>
+                      <div class="col-lg-4" *ngIf="delaiType === 'periode'">
+                        <label class="form-label">A</label>
+                        <input type="number" class="form-control" [(ngModel)]="delaiA" min="0">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-lg-4">
+                    <label class="form-label">Total HT</label>
+                    <input type="number" class="form-control total-ht" [value]="totalHT" readonly>
+                  </div>
+                  <div class="col-lg-4">
+                    <label class="form-label">TVA (%)</label>
+                    <div class="d-flex gap-2">
+                      <input type="number" class="form-control tva" [(ngModel)]="tva" 
+                             (input)="calculateTotals()" [readonly]="!tvaActive" min="0" max="100">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="tvaActive" 
+                               (change)="onTvaToggle()">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-4">
+                    <label class="form-label">Total TTC</label>
+                    <input type="number" class="form-control total-ttc" [value]="totalTTC" readonly>
+                  </div>
+                  <div class="col-lg-6 mt-2">
+                    <label class="form-label">Acompte</label>
+                    <input type="number" class="form-control acompte" [value]="acompte" readonly>
+                  </div>
+                  <div class="col-lg-6 mt-2">
+                    <label class="form-label">Solde</label>
+                    <input type="number" class="form-control solde" [value]="solde" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+        <button class="btn btn-success mt-3" (click)="nextStep()">
+          <i class="fas fa-arrow-right"></i> Suivant
+        </button>
+      </div>
+
+      <!-- Étape 2 : Aperçu et Enregistrement -->
+      <div *ngIf="step === 2">
+        <h5>Aperçu du Devis</h5>
+        
+        <div class="row mb-4">
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h6>Informations générales</h6>
+              </div>
+              <div class="card-body">
+                <p><strong>Client:</strong> {{ getClientName() }}</p>
+                <p><strong>Date d'échéance:</strong> {{ dateEcheance }}</p>
+                <p><strong>Date de démission:</strong> {{ dateDemission || 'Non spécifiée' }}</p>
+                <p><strong>Devise:</strong> {{ devise }}</p>
+                <p><strong>Banque:</strong> {{ getBanqueName() }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h6>Conditions financières</h6>
+              </div>
+              <div class="card-body">
+                <p><strong>Commande:</strong> {{ commande }}%</p>
+                <p><strong>Livraison:</strong> {{ livraison }}%</p>
+                <p><strong>Validité de l'offre:</strong> {{ validiteOffre }} jours</p>
+                <p><strong>Délai de livraison:</strong> {{ getDelaiText() }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h6>Lignes de devis</h6>
+          </div>
+          <div class="card-body">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Désignation</th>
+                  <th>Quantité</th>
+                  <th>Prix Unitaire</th>
+                  <th>Remise</th>
+                  <th>Prix Net</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let l of lignes">
+                  <td>{{ getDesignationName(l.designationId) }}</td>
+                  <td>{{ l.quantite }}</td>
+                  <td>{{ l.prix | number:'1.2-2' }} {{ devise }}</td>
+                  <td>{{ l.remise || 0 }}%</td>
+                  <td>{{ l.prixNet | number:'1.2-2' }} {{ devise }}</td>
+                  <td>{{ l.total | number:'1.2-2' }} {{ devise }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="text-end"><strong>Total HT:</strong></td>
+                  <td><strong>{{ totalHT | number:'1.2-2' }} {{ devise }}</strong></td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="text-end"><strong>TVA ({{ tva }}%):</strong></td>
+                  <td><strong>{{ totalTVA | number:'1.2-2' }} {{ devise }}</strong></td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="text-end"><strong>Total TTC:</strong></td>
+                  <td><strong>{{ totalTTC | number:'1.2-2' }} {{ devise }}</strong></td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="text-end"><strong>Acompte ({{ commande }}%):</strong></td>
+                  <td><strong>{{ acompte | number:'1.2-2' }} {{ devise }}</strong></td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="text-end"><strong>Solde:</strong></td>
+                  <td><strong>{{ solde | number:'1.2-2' }} {{ devise }}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button class="btn btn-secondary" (click)="previousStep()">
+            <i class="fas fa-arrow-left"></i> Précédent
+          </button>
+          <button class="btn btn-success" (click)="saveDevis()">
+            <i class="fas fa-save"></i> Enregistrer le devis
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

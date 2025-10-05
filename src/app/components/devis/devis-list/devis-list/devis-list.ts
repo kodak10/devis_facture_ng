@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -10,7 +11,7 @@ import 'datatables.net';
 @Component({
   selector: 'app-devis',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbModalModule],
+  imports: [CommonModule, FormsModule, NgbModalModule, RouterModule],
   templateUrl: './devis-list.html',
   styleUrls: ['./devis-list.scss']
 })
@@ -19,6 +20,10 @@ export class DevisListsComponent implements OnInit, OnDestroy {
   selectedDevis: Devis = {} as Devis;
 
   dataTable: any;
+
+  private apiUrl = 'http://192.168.1.13:8000/api/devis';
+  //private apiUrl = 'http://127.0.0.1:8000/api/devis';
+
 
   constructor(private devisService: DevisService, private modalService: NgbModal, private toastr: ToastrService) {}
 
@@ -52,6 +57,10 @@ export class DevisListsComponent implements OnInit, OnDestroy {
   openModal(content: any, devis: Devis | null = null) {
     this.selectedDevis = devis ? { ...devis } : {} as Devis;
     this.modalService.open(content, { size: 'lg' });
+  }
+
+  getPdfUrl(devisId: number): string {
+    return `${this.apiUrl}/${devisId}/pdf`;
   }
 
   saveDevis(formData: any) {

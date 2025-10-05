@@ -14,7 +14,8 @@ export interface ConfigurationGenerale {
 
 @Injectable({ providedIn: 'root' })
 export class ConfigurationGeneraleService {
-  private apiUrl = 'http://localhost:8000/api/entreprise';
+  // private apiUrl = 'http://localhost:8000/api/entreprise';
+  private apiUrl = 'http://192.168.1.13:8000/api/entreprise';
 
   constructor(private http: HttpClient) {}
 
