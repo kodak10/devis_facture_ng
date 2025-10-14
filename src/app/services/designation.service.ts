@@ -12,8 +12,8 @@ export interface Designation {
 
 @Injectable({ providedIn: 'root' })
 export class DesignationService {
-  // private apiUrl = 'http://localhost:8000/api/designations';
-  private apiUrl = 'http://192.168.1.13:8000/api/designations';
+  private apiUrl = 'http://localhost:8000/api/designations';
+  // private apiUrl = 'http://192.168.1.13:8000/api/designations';
 
   constructor(private http: HttpClient) {}
 
@@ -32,6 +32,6 @@ export class DesignationService {
   deleteDesignation(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
-  
+
 
 }

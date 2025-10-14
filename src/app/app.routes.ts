@@ -4,8 +4,8 @@ import { DashboardComponent  } from './components/dashboard/dashboard.component'
 export const routes: Routes = [
     {path : '', redirectTo: '/dashboard', pathMatch: 'full'},
 
-    { 
-        path: 'dashboard', component: DashboardComponent 
+    {
+        path: 'dashboard', component: DashboardComponent
     },
     {
         path: 'configuration-generale',
@@ -24,6 +24,22 @@ export const routes: Routes = [
         loadChildren: () => import('./components/clients/clients.routes').then(m => m.CLIENTS_ROUTES)
     },
     {
+        path: 'absences',
+        loadChildren: () => import('./components/demandes/absence.routes').then(m => m.ABSENCE_ROUTES)
+    },
+    {
+        path: 'materiels',
+        loadChildren: () => import('./components/demandes/bien-et-service.routes').then(m => m.BIEN_ET_SERVICE_ROUTES)
+    },
+    {
+        path: 'congers',
+        loadChildren: () => import('./components/demandes/conge.routes').then(m => m.CONGE_ROUTES)
+    },
+    {
+        path: 'permissions',
+        loadChildren: () => import('./components/demandes/permission.routes').then(m => m.PERMISSION_ROUTES)
+    },
+    {
         path: 'designations',
         loadChildren: () => import('./components/designations/designations.routes').then(m => m.DESIGNATION_ROUTES)
     },
@@ -39,12 +55,24 @@ export const routes: Routes = [
         path: 'devis/edit/:id',
         loadChildren: () => import('./components/devis/devis-edit/devis-edit/devis-edit.routes').then(m => m.DEVIS_EDIT_ROUTES)
     },
-    // { 
-    //     path: 'devis', 
+    {
+        path: 'travel',
+        loadChildren: () => import('./components/travel_request/travel-list/travel_list.routes').then(m => m.TRAVELS_LIST_ROUTES)
+    },
+    {
+        path: 'travel/create',
+        loadChildren: () => import('./components/travel_request/travel-create/travel-create.routes').then(m => m.TRAVELS_CREATE_ROUTES)
+    },
+    {
+        path: 'travel/edit/:id',
+        loadChildren: () => import('./components/travel_request/travel-edit/travel-edit.routes').then(m => m.TRAVELS_EDIT_ROUTES)
+    },
+    // {
+    //     path: 'devis',
     //     loadChildren: () => import('./components/devis/devis.routes').then(m => m.DEVIS_ROUTES)
     // },
-    // { 
-    //     path: 'factures', 
+    // {
+    //     path: 'factures',
     //     loadChildren: () => import('./components/factures/factures.routes').then(m => m.FACTURES_ROUTES)
     // }
 ];

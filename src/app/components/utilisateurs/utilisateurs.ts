@@ -46,7 +46,7 @@ export class UtilisateursComponent implements OnInit {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
-    
+
     // cacher après 5 secondes
     setTimeout(() => {
       this.showToast = false;
@@ -88,7 +88,7 @@ export class UtilisateursComponent implements OnInit {
     this.formUser = { ...this.selectedUser };
     this.errors = {};
 
-    const modalRef = this.modalService.open(content, { 
+    const modalRef = this.modalService.open(content, {
       size: 'lg',
       backdrop: 'static',
       keyboard: false
@@ -155,7 +155,7 @@ export class UtilisateursComponent implements OnInit {
       }
 
       $('.select2-container').remove();
-      
+
     } catch (error) {
       console.log('Erreur lors du nettoyage Select2:', error);
     }
@@ -164,7 +164,7 @@ export class UtilisateursComponent implements OnInit {
   setSelect2Values() {
     // Définir les valeurs pour les rôles
     if (this.formUser.roles) {
-      const roleNames = this.formUser.roles.map((role: any) => 
+      const roleNames = this.formUser.roles.map((role: any) =>
         typeof role === 'object' ? role.name : role
       );
       $('#roles').val(roleNames).trigger('change');
@@ -187,7 +187,7 @@ export class UtilisateursComponent implements OnInit {
 
     console.log('Payload envoyé :', payload);
 
-    const request = this.selectedUser.id 
+    const request = this.selectedUser.id
       ? this.utilisateurService.updateUser(payload)
       : this.utilisateurService.createUser(payload);
 
@@ -197,8 +197,8 @@ export class UtilisateursComponent implements OnInit {
         this.modalService.dismissAll();
         this.loadUsers();
         this.showNotification(
-          this.selectedUser.id 
-            ? 'Utilisateur modifié avec succès' 
+          this.selectedUser.id
+            ? 'Utilisateur modifié avec succès'
             : 'Utilisateur créé avec succès',
           'success'
         );
@@ -216,9 +216,9 @@ export class UtilisateursComponent implements OnInit {
 
   deleteUser(userId?: number) {
     if (!userId) return;
-    
+
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
-    
+
     this.utilisateurService.deleteUser(userId).subscribe({
       next: () => {
         this.loadUsers();

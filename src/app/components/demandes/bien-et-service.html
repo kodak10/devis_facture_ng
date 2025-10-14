@@ -1,0 +1,80 @@
+<div class="container-fluid">
+
+  <!-- Title -->
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 font-size-18">Bien et service</h4>
+      <button class="btn btn-primary" (click)="openModal(materielModal)">
+        <i class="bx bx-plus me-1"></i> Faire une Demande de materiel
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Types de demande*</th>
+                <th>Motif*</th>
+                <th>Montant*</th>
+                <th>Documents*</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let demande of demandes">
+                <td>{{ demande.motif_permi }}</td>
+                <td>{{ demande.motif }}</td>
+                <td>{{ demande.montant_demande }}</td>
+                <td class="text-center">
+                  <a [href]="demande.document_justificatif" target="_blank" class="text-decoration-none">
+                    <i class="material-icons" style="color: #ffc107;">📑</i>
+                    {{ demande.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
+                  </a>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-warning me-2" (click)="openModal(materielModal, demande)">Modifier</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteDemande(demande.id)">Supprimer</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <ng-template #materielModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ selectedDemande.id ? 'Modifier demande' : 'Nouvelle demande' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form #demandeForm="ngForm" (ngSubmit)="saveDemande(demandeForm.value)">
+        <div class="mb-3">
+          <label>Type de demande*</label>
+          <input type="text" id="motif_permi" class="form-control" name="motif_permi" [(ngModel)]="formDemande.motif_permi" required>
+        </div>
+        <div class="mb-3">
+          <label>Motif*</label>
+          <input type="text" id="motif" class="form-control" name="motif" [(ngModel)]="formDemande.motif" required>
+        </div>
+        <div class="mb-3">
+          <label>Montants*</label>
+          <input type="number" id="montant_demande" class="form-control" name="montant_demande" [(ngModel)]="formDemande.montant_demande" required>
+        </div>
+        <div class="mb-3">
+          <label>Document justificatif*</label>
+          <input type="file" id="document_justificatif" class="form-control" name="document_justificatif" [(ngModel)]="formDemande.document_justificatif">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">{{ selectedDemande.id ? 'Mettre à jour' : 'Créer' }}</button>
+      </form>
+    </div>
+  </ng-template>
+
+</div>

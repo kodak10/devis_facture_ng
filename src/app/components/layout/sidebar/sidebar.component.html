@@ -42,6 +42,18 @@
 
                             <li>
                                 <a href="javascript: void(0);" class="has-arrow">
+                                    <i data-feather="users"></i>
+                                    <span data-key="t-authentication">Missions</span>
+                                </a>
+                                <ul class="sub-menu" aria-expanded="false">
+                                    <li><a routerLink="/travel/create" data-key="t-login">Créer</a></li>
+                                    <li><a routerLink="/travel" data-key="t-register">Liste</a></li>
+                                    <li><a href="auth-recoverpw.html" data-key="t-recover-password">Suivi</a></li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <a href="javascript: void(0);" class="has-arrow">
                                     <i data-feather="file-text"></i>
                                     <span data-key="t-pages">Comptabilité & Report</span>
                                 </a>
@@ -75,6 +87,34 @@
                             </li>
 
                             <li>
+                                <a routerLink="/absences">
+                                    <i data-feather="layout"></i>
+                                    <span data-key="t-horizontal">Demande d'absence</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a routerLink="/materiels">
+                                    <i data-feather="layout"></i>
+                                    <span data-key="t-horizontal">Demande de bien et service</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a routerLink="/congers">
+                                    <i data-feather="layout"></i>
+                                    <span data-key="t-horizontal">Demande de Conges</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a routerLink="/permissions">
+                                    <i data-feather="layout"></i>
+                                    <span data-key="t-horizontal">Demande de Permissions</span>
+                                </a>
+                            </li>
+
+                            <li>
                                 <a routerLink="/utilisateurs">
                                     <i data-feather="layout"></i>
                                     <span data-key="t-horizontal">Utilisateurs</span>
@@ -88,9 +128,9 @@
                                 </a>
                             </li>
 
-                           
-                           
-                           
+
+
+
 
                         </ul>
                     </div>

@@ -10,8 +10,8 @@ export interface Banque {
 
 @Injectable({ providedIn: 'root' })
 export class BanqueService {
-  // private apiUrl = 'http://localhost:8000/api/banques';
-  private apiUrl = 'http://192.168.1.13:8000/api/banques';
+  private apiUrl = 'http://localhost:8000/api/banques';
+  // private apiUrl = 'http://192.168.1.13:8000/api/banques';
 
   constructor(private http: HttpClient) {}
 

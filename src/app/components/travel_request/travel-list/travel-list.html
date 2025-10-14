@@ -1,0 +1,64 @@
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4>Devis</h4>
+      <a class="btn btn-primary" routerLink="/travel/create">
+        <i class="fas fa-plus me-2"></i>Ajouter
+      </a>
+
+    </div>
+  </div>
+
+  <div class="card border-0">
+    <div class="card-body">
+      <div class="table-responsive ">
+        <table id="devisTable" class="table table-bordered table-striped w-100">
+        <thead>
+          <tr>
+            <th>Nom & Prenom</th>
+            <th>Date de Saisie</th>
+            <th>Lieu</th>
+            <!-- <th>Motif</th> -->
+            <th>Date de Depart</th>
+            <!-- <th>Montant(en chiffre)</th> -->
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of travelsList">
+            <td>{{ d.nom_prenom }}</td>
+            <td>{{ d.date | date: 'dd-MM-yyyy'}}</td>
+            <td>{{ d.lieu || d.lieu }}</td>
+            <!-- <td>{{ d.motif || d.motif }}</td> -->
+            <td>{{ d.debut | date:'dd-MM-yyyy' }}</td>
+            <!-- <td>{{ d.montant_en_chiffre | number:'1.2-2'  }}</td> -->
+            <td class="text-end">{{ d.totale | number:'1.2-2' }}</td>
+            <td>{{ d.status }}</td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-warning btn-sm me-1"
+                      [routerLink]="['/travel/edit', d.id]"
+                      title="Modifier le travel request">
+                <i class="fas fa-edit"></i>
+              </button>
+                <button class="btn btn-warning btn-sm me-1"
+                        (click)="getPdfUrl(d.id)"
+                        title="Ouvrir le PDF">
+                  <i class="fas fa-file-pdf"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="deleteTravels(d.id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+
+</div>

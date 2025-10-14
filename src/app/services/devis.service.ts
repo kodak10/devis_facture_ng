@@ -73,8 +73,8 @@ export interface Devis extends DevisCreate {
   providedIn: 'root'
 })
 export class DevisService {
-  // private apiUrl = 'http://127.0.0.1:8000/api/devis';
-  private apiUrl = 'http://192.168.1.13:8000/api/devis';
+  private apiUrl = 'http://127.0.0.1:8000/api/devis';
+  // private apiUrl = 'http://192.168.1.13:8000/api/devis';
 
   constructor(private http: HttpClient) {}
 

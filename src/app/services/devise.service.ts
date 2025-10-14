@@ -19,8 +19,8 @@ export interface TauxChange {
   providedIn: 'root'
 })
 export class DeviseService {
-  // private apiUrl = 'http://127.0.0.1:8000/api';
-  private apiUrl = 'http://192.168.1.13:8000/api';
+  private apiUrl = 'http://127.0.0.1:8000/api';
+  // private apiUrl = 'http://192.168.1.13:8000/api';
 
   private exchangeApiKey = 'd4a11ade825bdc9907f23c6a';
 

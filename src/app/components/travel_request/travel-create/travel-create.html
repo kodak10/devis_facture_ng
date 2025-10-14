@@ -1,0 +1,178 @@
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Création de Travel Request</h4>
+    </div>
+
+    <div class="card-body">
+      <!-- Indicateur d'étapes -->
+      <div class="steps-indicator mb-4">
+        <div class="d-flex justify-content-center align-items-center">
+          <div class="step-item" [class.active]="step === 1" [class.completed]="step > 1">
+            <div class="step-icon"><i class="fas fa-edit"></i></div>
+            <div class="step-label">Saisie</div>
+          </div>
+          <div class="step-connector" [class.completed]="step > 1"></div>
+
+          <div class="step-item" [class.active]="step === 2" [class.completed]="step > 2">
+            <div class="step-icon"><i class="fas fa-eye"></i></div>
+            <div class="step-label">Aperçu</div>
+          </div>
+          <div class="step-connector" [class.completed]="step > 2"></div>
+
+          <div class="step-item" [class.active]="step === 3">
+            <div class="step-icon"><i class="fas fa-check"></i></div>
+            <div class="step-label">Confirmation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Étape 1 : Saisie -->
+      <div *ngIf="step === 1">
+        <div class="row">
+          <div class="col-lg-4">
+            <label class="form-label">Nom & Prénom <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="nom_prenom" name="nom_prenom" />
+            <div class="invalid-feedback d-block" *ngIf="errors.nom_prenom">{{ errors.nom_prenom }}</div>
+          </div>
+
+          <div class="col-lg-4">
+            <label class="form-label">Date d’émission <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="date" name="date" />
+            <div class="invalid-feedback d-block" *ngIf="errors.date">{{ errors.date }}</div>
+          </div>
+
+          <div class="col-lg-4">
+            <label class="form-label">Lieu <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="lieu" name="lieu" />
+            <div class="invalid-feedback d-block" *ngIf="errors.lieu">{{ errors.lieu }}</div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-lg-4">
+            <label class="form-label">Date de départ <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="debut" name="debut" />
+            <div class="invalid-feedback d-block" *ngIf="errors.debut">{{ errors.debut }}</div>
+          </div>
+
+          <div class="col-lg-4">
+            <label class="form-label">Date fin <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="fin" name="fin" />
+            <div class="invalid-feedback d-block" *ngIf="errors.fin">{{ errors.fin }}</div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-lg-3">
+            <label class="form-label">Motif</label>
+            <input type="text" class="form-control" [(ngModel)]="motif" name="motif" />
+          </div>
+
+          <div class="col-lg-3">
+            <label class="form-label">Montant demandé (en chiffres)</label>
+            <input type="text" class="form-control" [(ngModel)]="montant_en_chiffre" name="montant_en_chiffre" />
+          </div>
+
+          <div class="col-lg-3">
+            <label class="form-label">(en lettres)</label>
+            <input type="text" class="form-control" [(ngModel)]="montant_en_lettre" name="montant_en_lettre" />
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-lg-3">
+              <label class="form-label">Billet d’avion</label>
+              <input type="number" class="form-control" [(ngModel)]="billet_avion" name="billet_avion"
+                    (input)="updateTotal()" placeholder="0">
+            </div>
+
+            <div class="col-lg-3">
+              <label class="form-label">Chèque de voyage</label>
+              <input type="number" class="form-control" [(ngModel)]="cheque" name="cheque"
+                    (input)="updateTotal()" placeholder="0">
+            </div>
+
+            <div class="col-lg-3">
+              <label class="form-label">Hébergement & Repas</label>
+              <input type="number" class="form-control" [(ngModel)]="hebergement_repars" name="hebergement_repars"
+                    (input)="updateTotal()" placeholder="0">
+            </div>
+
+            <div class="col-lg-3">
+              <label class="form-label">Espèces</label>
+              <input type="number" class="form-control" [(ngModel)]="especes" name="especes"
+                    (input)="updateTotal()" placeholder="0">
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-lg-3">
+              <label class="form-label fw-bold">Total</label>
+              <input type="text" class="form-control fw-bold bg-light" [(ngModel)]="totale" name="totale" readonly>
+            </div>
+          </div>
+        </div>
+
+        <hr />
+        <button class="btn btn-success mt-3" (click)="nextStep()">
+          <i class="fas fa-arrow-right"></i> Suivant
+        </button>
+      </div>
+
+      <!-- Étape 2 : Aperçu -->
+      <div *ngIf="step === 2">
+        <h5>Aperçu du Travel Request</h5>
+
+        <div class="row mb-4">
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header"><h6>Informations générales</h6></div>
+              <div class="card-body">
+                <p><strong>Nom & Prénom :</strong> {{ nom_prenom }}</p>
+                <p><strong>Date :</strong> {{ date }}</p>
+                <p><strong>Lieu :</strong> {{ lieu }}</p>
+                <p><strong>Du :</strong> {{ debut }}</p>
+                <p><strong>Au :</strong> {{ fin }}</p>
+                <p><strong>Motif :</strong> {{ motif }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header"><h6>Conditions financières</h6></div>
+              <div class="card-body">
+                <p><strong>Montant demandé (chiffres) :</strong> {{ montant_en_chiffre }}</p>
+                <p><strong>Montant (lettres) :</strong> {{ montant_en_lettre }}</p>
+                <p><strong>Billet d’avion :</strong> {{ billet_avion }}</p>
+                <p><strong>Chèque de voyage :</strong> {{ cheque }}</p>
+                <p><strong>Hébergement & Repas :</strong> {{ hebergement_repars }}</p>
+                <p><strong>Espèces :</strong> {{ especes }}</p>
+                <p><strong>Total :</strong> {{ totale }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button class="btn btn-secondary" (click)="previousStep()">
+            <i class="fas fa-arrow-left"></i> Précédent
+          </button>
+          <button class="btn btn-success" (click)="saveTravels()">
+            <i class="fas fa-save"></i> Enregistrer la demande
+          </button>
+        </div>
+      </div>
+
+      <!-- Étape 3 : Confirmation -->
+      <div *ngIf="step === 3" class="text-center mt-4">
+        <i class="fas fa-check-circle text-success" style="font-size: 60px;"></i>
+        <h4 class="mt-3 text-success">Votre demande de travel request a été enregistrée avec succès !</h4>
+        <p class="mt-2">Vous recevrez bientôt un PDF généré automatiquement.</p>
+        <button class="btn btn-primary mt-3" (click)="resetForm()">
+          <i class="fas fa-plus"></i> Nouvelle demande
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

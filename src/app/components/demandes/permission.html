@@ -1,0 +1,116 @@
+<div class="container-fluid">
+
+  <!-- Title -->
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 font-size-18">Permissions</h4>
+      <button class="btn btn-primary" (click)="openModal(permissionsModal)">
+        <i class="bx bx-plus me-1"></i> Faire une Demande de Permissions
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Type de Permissions*</th>
+                <th>Motif*</th>
+                <th>Date de départ*</th>
+                <th>Date de fin*</th>
+                <th>Document*</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let permission of permissions">
+                <td>{{ permission.motif }}</td>
+                <td>{{ permission.motif_permi }}</td>
+                <td>{{ permission.date_depart }}</td>
+                <td>{{ permission.date_fin }}</td>
+                <td class="text-center">
+                  <a [href]="permission.document_justificatif" target="_blank" class="text-decoration-none">
+                    <i class="material-icons" style="color: #ffc107;">📑</i>
+                    {{ permission.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
+                  </a>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-warning me-2" (click)="openModal(permissionsModal, permission)">Modifier</button>
+                  <button class="btn btn-sm btn-danger" (click)="deletePermission(permission.id)">Supprimer</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <ng-template #permissionsModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ selectedPermission.id ? 'Modifier demande' : 'Nouvelle demande' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form #demandeForm="ngForm" (ngSubmit)="savePermission(demandeForm.value)">
+        <div class="mb-3">
+          <label>Type de Permission*</label>
+          <select id="motif" class="form-control" name="motif"
+                  [(ngModel)]="formPermission.motif"
+                  (change)="onTypeChange($event)"
+                  required>
+            <option value="" disabled selected>-- Sélectionner une raison --</option>
+            <option value="Mon mariage" [attr.data-nombre]="4">Mon mariage</option>
+            <option value="Mariage d'un parent" [attr.data-nombre]="2">Mariage d'un parent</option>
+            <option value="Décès du conjoint" [attr.data-nombre]="5">Décès du conjoint</option>
+            <option value="Décès d'un parent" [attr.data-nombre]="5">Décès d'un parent</option>
+            <option value="Décès d'un frère ou d'une soeur" [attr.data-nombre]="2">Décès d'un frère ou d'une soeur</option>
+            <option value="Décès d'un beau-parent" [attr.data-nombre]="2">Décès d'un beau-parent</option>
+            <option value="Naissance d'un enfant" [attr.data-nombre]="2">Naissance d'un enfant</option>
+            <option value="Baptême d'un enfant" [attr.data-nombre]="1">Baptême d'un enfant</option>
+            <option value="Première communion" [attr.data-nombre]="1">Première communion</option>
+            <option value="Déménagement" [attr.data-nombre]="1">Déménagement</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label>Motif*</label>
+          <input type="text" id="motif_permi" class="form-control"
+                name="motif_permi"
+                [(ngModel)]="formPermission.motif_permi" required>
+        </div>
+
+        <div class="mb-3">
+          <label>Date de départ*</label>
+          <input type="date" id="date_depart" class="form-control"
+                name="date_depart"
+                [(ngModel)]="formPermission.date_depart"
+                (change)="updateDateFin()"
+                required>
+        </div>
+
+        <div class="mb-3">
+          <label>Date de fin*</label>
+          <input type="date" id="date_fin" class="form-control"
+                name="date_fin"
+                [(ngModel)]="formPermission.date_fin"
+                readonly>
+        </div>
+        <div class="mb-3">
+          <label>Document justificatif*</label>
+          <input type="file" id="document_justificatif" class="form-control" name="document_justificatif" [(ngModel)]="formPermission.document_justificatif">
+        </div>
+        <div *ngIf="dateRepriseMessage" class="alert alert-info p-2 mt-2">
+          {{ dateRepriseMessage }}
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">{{ selectedPermission.id ? 'Mettre à jour' : 'Créer' }}</button>
+      </form>
+    </div>
+  </ng-template>
+
+</div>

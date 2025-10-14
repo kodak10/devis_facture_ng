@@ -1,0 +1,119 @@
+<div class="container-fluid">
+
+  <!-- Title -->
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 font-size-18">Conger</h4>
+      <button class="btn btn-primary" (click)="openModal(congerModal)">
+        <i class="bx bx-plus me-1"></i> Faire une Demande de Conger
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Type de Conge*</th>
+                <th>Motif*</th>
+                <th>Date de départ*</th>
+                <th>Date de fin*</th>
+                <th>Document*</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let conger of conges">
+                <td>{{ conger.motif }}</td>
+                <td>{{ conger.motif_permi }}</td>
+                <td>{{ conger.date_depart }}</td>
+                <td>{{ conger.date_fin }}</td>
+                <td class="text-center">
+                  <a [href]="conger.document_justificatif" target="_blank" class="text-decoration-none">
+                    <i class="material-icons" style="color: #ffc107;">📑</i>
+                    {{ conger.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
+                  </a>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-warning me-2" (click)="openModal(congerModal, conger)">Modifier</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteConger(conger.id)">Supprimer</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <ng-template #congerModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ selectedConger.id ? 'Modifier demande' : 'Nouvelle demande' }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form #demandeForm="ngForm" (ngSubmit)="saveConger(demandeForm.value)">
+        <div class="mb-3">
+          <label>Type de Congé*</label>
+          <select id="motif" class="form-control" name="motif"
+                  [(ngModel)]="formConger.motif"
+                  (change)="onTypeChange($event)"
+                  required>
+            <option value="" disabled selected>-- Sélectionner une raison --</option>
+            <option value="Congés annuel" [attr.data-nombre]="30">Congés annuel</option>
+            <option value="Congés partiel" [attr.data-nombre]="15">Congés partiel</option>
+          </select>
+        </div>
+
+        <div class="mb-3" *ngIf="isPartiel">
+          <label>Nombre de jours (max 15)</label>
+          <input type="number" class="form-control"
+                [(ngModel)]="formConger.nombre_de_jours"
+                name="nombre_jours"
+                min="1"
+                max="15"
+                (input)="updateDateFin()"
+                required>
+        </div>
+
+        <div class="mb-3">
+          <label>Motif*</label>
+          <input type="text" id="motif_permi" class="form-control"
+                name="motif_permi"
+                [(ngModel)]="formConger.motif_permi" required>
+        </div>
+
+        <div class="mb-3">
+          <label>Date de départ*</label>
+          <input type="date" id="date_depart" class="form-control"
+                name="date_depart"
+                [(ngModel)]="formConger.date_depart"
+                (change)="updateDateFin()"
+                required>
+        </div>
+
+        <div class="mb-3">
+          <label>Date de fin*</label>
+          <input type="date" id="date_fin" class="form-control"
+                name="date_fin"
+                [(ngModel)]="formConger.date_fin"
+                readonly>
+        </div>
+        <div class="mb-3">
+          <label>Document justificatif*</label>
+          <input type="file" id="document_justificatif" class="form-control" name="document_justificatif" [(ngModel)]="formConger.document_justificatif">
+        </div>
+        <div *ngIf="dateRepriseMessage" class="alert alert-info p-2 mt-2">
+          {{ dateRepriseMessage }}
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">{{ selectedConger.id ? 'Mettre à jour' : 'Créer' }}</button>
+      </form>
+    </div>
+  </ng-template>
+
+</div>

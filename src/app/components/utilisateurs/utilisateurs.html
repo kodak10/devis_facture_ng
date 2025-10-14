@@ -156,7 +156,7 @@
           <div class="col-lg-6">
             <div class="mb-3">
               <label class="form-label">Adresse</label>
-              <input type="text" class="form-control" name="adresse" [(ngModel)]="formUser.adresse" [readonly]="selectedUser?.id">
+              <input type="text" class="form-control" name="adresse" [(ngModel)]="formUser.adresse" [readonly]="selectedUser.id">
               <div class="text-danger" *ngIf="errors?.adresse">{{ errors.adresse[0] }}</div>
             </div>
           </div>
