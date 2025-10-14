@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { BanqueService, Banque } from '../../services/banque.service';
+import { ToastrService } from 'ngx-toastr';
 
 declare var $: any; // pour initialiser DataTable
 
@@ -19,7 +20,7 @@ export class BanquesComponent implements OnInit {
   formBanque: Banque = {} as Banque;
   errors: any = {};
 
-  constructor(private banqueService: BanqueService, private modalService: NgbModal) {}
+  constructor(private banqueService: BanqueService, private modalService: NgbModal, private toastr: ToastrService,) {}
 
   ngOnInit(): void {
     this.loadBanques();
@@ -58,23 +59,34 @@ export class BanquesComponent implements OnInit {
       : this.banqueService.createBanque(payload);
 
     request.subscribe({
-      next: () => {
-        // Fermer le modal
+      next: (res) => {
         this.modalService.dismissAll();
-
-        // Recharger la liste
+        this.toastr.success('Opération réussie', 'Succès');
         this.loadBanques();
       },
       error: (err) => {
-        this.errors = err.error.errors;
+        if (err.error?.errors) {
+          // Validation errors
+          this.errors = err.error.errors;
+        }
+        this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur');
       }
     });
   }
 
-
   deleteBanque(id?: number) {
     if (!id) return;
     if (!confirm('Voulez-vous supprimer cette banque ?')) return;
-    this.banqueService.deleteBanque(id).subscribe(() => this.loadBanques());
+
+    this.banqueService.deleteBanque(id).subscribe({
+      next: (res) => {
+        this.toastr.success(res.message || 'Banque supprimée', 'Succès');
+        this.loadBanques();
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur');
+      }
+    });
   }
+
 }

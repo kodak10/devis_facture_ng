@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Banque {
@@ -15,19 +15,28 @@ export class BanqueService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
   getBanques(page: number = 1): Observable<any> {
-    return this.http.get(`${this.apiUrl}?page=${page}`);
+    return this.http.get(`${this.apiUrl}?page=${page}`, this.getHeaders());
   }
 
   createBanque(banque: Banque): Observable<Banque> {
-    return this.http.post<Banque>(this.apiUrl, banque);
+    return this.http.post<Banque>(this.apiUrl, banque, this.getHeaders());
   }
 
   updateBanque(banque: Banque): Observable<Banque> {
-    return this.http.put<Banque>(`${this.apiUrl}/${banque.id}`, banque);
+    return this.http.put<Banque>(`${this.apiUrl}/${banque.id}`, banque, this.getHeaders());
   }
 
   deleteBanque(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`, this.getHeaders());
   }
 }

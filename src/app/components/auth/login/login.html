@@ -1,0 +1,19 @@
+<div class="auth-page container">
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Connexion</h3>
+      <form (submit)="submit(); $event.preventDefault()">
+        <div class="mb-3">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="email" name="email" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label>Mot de passe</label>
+          <input type="password" [(ngModel)]="password" name="password" class="form-control" />
+        </div>
+        <button class="btn btn-primary" [disabled]="loading">{{ loading ? 'Connexion...' : 'Se connecter' }}</button>
+        <a routerLink="/forgot-password" class="ms-3">Mot de passe oublié?</a>
+      </form>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { ClientService, Client } from '../../services/client.service';
+import { ToastrService } from 'ngx-toastr';
 
 declare var $: any;
 
@@ -19,7 +20,7 @@ export class ClientsComponent implements OnInit {
   formClient: Client = {} as Client;
   errors: any = {};
 
-  constructor(private clientService: ClientService, private modalService: NgbModal) {}
+  constructor(private clientService: ClientService, private modalService: NgbModal,  private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.loadClients();
@@ -53,33 +54,49 @@ export class ClientsComponent implements OnInit {
   }
 
   saveClient(formData: any) {
-  const payload = { ...this.selectedClient, ...formData };
+    const payload = { ...this.selectedClient, ...formData };
 
-  const request = this.selectedClient.id
-    ? this.clientService.updateClient(payload)
-    : this.clientService.createClient(payload);
+    const request = this.selectedClient.id
+      ? this.clientService.updateClient(payload)
+      : this.clientService.createClient(payload);
 
-  request.subscribe({
-    next: () => {
-      // Fermer la modal
-      this.modalService.dismissAll();
+    request.subscribe({
+      next: (res) => {
+        // Fermer la modal
+        this.modalService.dismissAll();
 
-      // Recharger la liste
-      this.loadClients();
+        // Recharger la liste
+        this.loadClients();
 
-      // Réinitialiser les erreurs
-      this.errors = {};
-    },
-    error: (err) => {
-      this.errors = err.error.errors;
-    }
-  });
-}
+        // Réinitialiser les erreurs
+        this.errors = {};
 
+        // Message succès
+        this.toastr.success('Opération réussie', 'Succès');
+      },
+      error: (err) => {
+        // Gestion des erreurs de validation
+        if (err.error?.errors) {
+          this.errors = err.error.errors;
+        }
+        this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur');
+      }
+    });
+  }
 
   deleteClient(id?: number) {
     if (!id) return;
     if (!confirm('Voulez-vous supprimer ce client ?')) return;
-    this.clientService.deleteClient(id).subscribe(() => this.loadClients());
+
+    this.clientService.deleteClient(id).subscribe({
+      next: (res) => {
+        this.toastr.success(res.message || 'Client supprimé', 'Succès');
+        this.loadClients();
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur');
+      }
+    });
   }
+
 }

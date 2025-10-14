@@ -1,6 +1,6 @@
 // services/devise.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -22,6 +22,16 @@ export class DeviseService {
   private apiUrl = 'http://127.0.0.1:8000/api';
   // private apiUrl = 'http://192.168.1.13:8000/api';
 
+
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
   private exchangeApiKey = 'd4a11ade825bdc9907f23c6a';
 
   private defaultDevises: Devise[] = [
@@ -40,7 +50,7 @@ export class DeviseService {
   constructor(private http: HttpClient) {}
 
   getDevises(): Observable<Devise[]> {
-    return this.http.get<Devise[]>(`${this.apiUrl}/devises`).pipe(
+    return this.http.get<Devise[]>(`${this.apiUrl}/devises`, this.getHeaders()).pipe(
       catchError((error) => {
         console.warn('Erreur API devises, utilisation des devises par défaut:', error);
         return of(this.defaultDevises);
@@ -58,7 +68,7 @@ export class DeviseService {
   }
 
   getTauxChange(baseDevise: string = 'XOF'): Observable<TauxChange> {
-    return this.http.get<TauxChange>(`${this.apiUrl}/taux-change?base=${baseDevise}`).pipe(
+    return this.http.get<TauxChange>(`${this.apiUrl}/taux-change?base=${baseDevise}`, this.getHeaders()).pipe(
       catchError((error) => {
         console.warn('Erreur API taux change, utilisation de taux par défaut:', error);
         return of(this.defaultTaux);
@@ -67,7 +77,7 @@ export class DeviseService {
   }
 
   getTauxChangeDirect(): Observable<any> {
-    return this.http.get(`https://v6.exchangerate-api.com/v6/${this.exchangeApiKey}/latest/XOF`).pipe(
+    return this.http.get(`https://v6.exchangerate-api.com/v6/${this.exchangeApiKey}/latest/XOF`, this.getHeaders()).pipe(
       catchError((error) => {
         console.error('Erreur API taux change direct:', error);
         throw error;

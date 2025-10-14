@@ -1,3 +1,17 @@
+
+<div class="d-flex justify-content-between">
+          <h5>Lignes de produits ou services <span class="text-danger">*</span></h5>
+
+          <div class="mb-3 d-flex">
+            <label for="categorieSelect" class="form-label">Filtrer par catégorie</label>
+            <select id="categorieSelect" class="form-select"
+                    [(ngModel)]="selectedCategorieId"
+                    (ngModelChange)="onCategorieFilterChange()">
+              <option [ngValue]="undefined">-- Toutes les catégories --</option>
+              <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.nom }}</option>
+            </select>
+          </div>
+        </div>
 <!-- Étape 1 : Saisie -->
 <div *ngIf="!isLoading && step === 1">
   <div class="row">
@@ -230,10 +244,10 @@
 <div *ngIf="!isLoading && step === 2">
   <div class="alert alert-info">
     <i class="fas fa-info-circle me-2"></i>
-    Vérifiez les informations ci-dessous avant d'enregistrer le devis.
+    Vérifiez les informations ci-dessous avant d'enregistrer la Proforma.
   </div>
 
-  <h5 class="mb-4">Aperçu du Devis #{{ devis.num_proforma }}</h5>
+  <h5 class="mb-4">Aperçu de la Proforma #{{ devis.num_proforma }}</h5>
   
   <!-- Informations générales -->
   <div class="row mb-4">
@@ -281,92 +295,163 @@
   </div>
 
   <!-- Lignes du devis -->
-  <div class="card mb-4">
-    <div class="card-header bg-light">
-      <h6 class="mb-0"><i class="fas fa-list me-2"></i>Lignes de devis</h6>
+  <!-- Section Lignes de produits ou services -->
+<div class="card mb-4">
+  <div class="card-header bg-light d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="fas fa-list me-2"></i>Lignes de produits ou services <span class="text-danger">*</span></h6>
+    
+    
+  </div>
+  
+  <div class="card-body">
+    
+    <div *ngIf="errors.lignes" class="alert alert-danger">
+      {{ errors.lignes }}
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead class="table-light">
-            <tr>
-              <th width="40%">Désignation</th>
-              <th width="10%" class="text-center">Quantité</th>
-              <th width="15%" class="text-end">Prix Unitaire</th>
-              <th width="10%" class="text-center">Remise</th>
-              <th width="15%" class="text-end">Prix Net</th>
-              <th width="10%" class="text-end">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let l of lignes; let i = index">
-              <td>{{ getDesignationName(l.designationId) }}</td>
-              <td class="text-center">{{ l.quantite }}</td>
-              <td class="text-end">{{ l.prix | number:'1.2-2' }} {{ devise }}</td>
-              <td class="text-center">{{ l.remise || 0 }}%</td>
-              <td class="text-end">{{ l.prixNet | number:'1.2-2' }} {{ devise }}</td>
-              <td class="text-end">{{ l.total | number:'1.2-2' }} {{ devise }}</td>
-            </tr>
-          </tbody>
-          <tfoot class="table-light">
-            <tr>
-              <td colspan="4" class="text-end"><strong>Total HT:</strong></td>
-              <td colspan="2" class="text-end"><strong>{{ totalHT | number:'1.2-2' }} {{ devise }}</strong></td>
-            </tr>
-            <tr *ngIf="tvaActive">
-              <td colspan="4" class="text-end"><strong>TVA ({{ tva }}%):</strong></td>
-              <td colspan="2" class="text-end"><strong>{{ totalTVA | number:'1.2-2' }} {{ devise }}</strong></td>
-            </tr>
-            <tr>
-              <td colspan="4" class="text-end"><strong>Total TTC:</strong></td>
-              <td colspan="2" class="text-end"><strong>{{ totalTTC | number:'1.2-2' }} {{ devise }}</strong></td>
-            </tr>
-            <tr>
-              <td colspan="4" class="text-end"><strong>Acompte ({{ commande }}%):</strong></td>
-              <td colspan="2" class="text-end"><strong>{{ acompte | number:'1.2-2' }} {{ devise }}</strong></td>
-            </tr>
-            <tr>
-              <td colspan="4" class="text-end"><strong>Solde:</strong></td>
-              <td colspan="2" class="text-end"><strong>{{ solde | number:'1.2-2' }} {{ devise }}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
+    
+    <!-- Formulaire des lignes (étape 1) -->
+    <div *ngIf="step">
+      <div *ngFor="let ligne of lignes; let i = index" class="row mb-3 align-items-center">
+        <div class="col-lg-4">
+          <label class="form-label">Désignation</label>
+          <select class="form-select" 
+                  [class.is-invalid]="errors['ligne_' + i + '_designation']"
+                  [(ngModel)]="ligne.designationId"
+                  (change)="onDesignationChange(ligne, i)">
+            <option [ngValue]="null">-- Sélectionner une désignation --</option>
+            <option *ngFor="let d of filteredDesignations()" [ngValue]="d.id">
+              {{ d.libelle }} - {{ d.prix_unitaire | number:'1.2-2' }} {{ deviseDepart }}
+            </option>
+          </select>
+          <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_designation']">
+            {{ errors['ligne_' + i + '_designation'] }}
+          </div>
+        </div>
+        
+        <div class="col-lg-1">
+          <label class="form-label">Qté</label>
+          <input type="number" class="form-control" 
+                 [class.is-invalid]="errors['ligne_' + i + '_quantite']"
+                 placeholder="Qté" 
+                 [(ngModel)]="ligne.quantite" 
+                 (input)="onLineChange()" 
+                 min="1" step="1">
+          <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_quantite']">
+            {{ errors['ligne_' + i + '_quantite'] }}
+          </div>
+        </div>
+        
+        <div class="col-lg-2">
+          <label class="form-label">Prix Unitaire</label>
+          <input type="number" class="form-control" 
+                 [class.is-invalid]="errors['ligne_' + i + '_prix']"
+                 placeholder="Prix" 
+                 [(ngModel)]="ligne.prix" 
+                 (input)="onLineChange()" 
+                 step="0.01" min="0">
+          <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_prix']">
+            {{ errors['ligne_' + i + '_prix'] }}
+          </div>
+        </div>
+        
+        <div class="col-lg-1">
+          <label class="form-label">Remise %</label>
+          <input type="number" class="form-control" 
+                 placeholder="%" 
+                 [(ngModel)]="ligne.remise" 
+                 (input)="onLineChange()" 
+                 min="0" max="100" step="0.01">
+        </div>
+        
+        <div class="col-lg-2">
+          <label class="form-label">Prix Net</label>
+          <input type="number" class="form-control" 
+                 placeholder="Prix Net" 
+                 [value]="ligne.prixNet || 0" 
+                 readonly>
+        </div>
+        
+        <div class="col-lg-1">
+          <label class="form-label">Total</label>
+          <input type="number" class="form-control" 
+                 placeholder="Total" 
+                 [value]="ligne.total || 0" 
+                 readonly>
+        </div>
+        
+        <div class="col-lg-1">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-danger btn-sm w-100" (click)="removeLine(i)" title="Supprimer cette ligne">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="row mt-3">
+        <div class="col-12">
+          <button class="btn btn-outline-primary btn-sm" (click)="addLine()">
+            <i class="fas fa-plus me-1"></i>Ajouter une ligne
+          </button>
+        </div>
       </div>
     </div>
+    
+    <!-- Affichage des lignes en lecture seule (étape 2) -->
+    <div *ngIf="step === 2" class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr>
+            <th width="40%">Désignation</th>
+            <th width="10%" class="text-center">Quantité</th>
+            <th width="15%" class="text-end">Prix Unitaire</th>
+            <th width="10%" class="text-center">Remise</th>
+            <th width="15%" class="text-end">Prix Net</th>
+            <th width="10%" class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of lignes; let i = index">
+            <td>{{ getDesignationName(l.designationId) }}</td>
+            <td class="text-center">{{ l.quantite }}</td>
+            <td class="text-end">{{ l.prix | number:'1.2-2' }} {{ devise }}</td>
+            <td class="text-center">{{ l.remise || 0 }}%</td>
+            <td class="text-end">{{ l.prixNet | number:'1.2-2' }} {{ devise }}</td>
+            <td class="text-end">{{ l.total | number:'1.2-2' }} {{ devise }}</td>
+          </tr>
+        </tbody>
+        <tfoot class="table-light">
+          <tr>
+            <td colspan="4" class="text-end"><strong>Total HT:</strong></td>
+            <td colspan="2" class="text-end"><strong>{{ totalHT | number:'1.2-2' }} {{ devise }}</strong></td>
+          </tr>
+          <tr *ngIf="tvaActive">
+            <td colspan="4" class="text-end"><strong>TVA ({{ tva }}%):</strong></td>
+            <td colspan="2" class="text-end"><strong>{{ totalTVA | number:'1.2-2' }} {{ devise }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="text-end"><strong>Total TTC:</strong></td>
+            <td colspan="2" class="text-end"><strong>{{ totalTTC | number:'1.2-2' }} {{ devise }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="text-end"><strong>Acompte ({{ commande }}%):</strong></td>
+            <td colspan="2" class="text-end"><strong>{{ acompte | number:'1.2-2' }} {{ devise }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="text-end"><strong>Solde:</strong></td>
+            <td colspan="2" class="text-end"><strong>{{ solde | number:'1.2-2' }} {{ devise }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
+</div>
 
-  <!-- Résumé financier -->
-  <div class="row mb-4">
-    <div class="col-lg-4">
-      <div class="card bg-success text-white">
-        <div class="card-body text-center">
-          <h6 class="card-title">Total HT</h6>
-          <h4 class="mb-0">{{ totalHT | number:'1.2-2' }} {{ devise }}</h4>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="card bg-primary text-white">
-        <div class="card-body text-center">
-          <h6 class="card-title">Total TTC</h6>
-          <h4 class="mb-0">{{ totalTTC | number:'1.2-2' }} {{ devise }}</h4>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="card bg-warning text-dark">
-        <div class="card-body text-center">
-          <h6 class="card-title">Acompte</h6>
-          <h4 class="mb-0">{{ acompte | number:'1.2-2' }} {{ devise }}</h4>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- Boutons d'actions -->
   <div class="d-flex justify-content-between mt-4">
     <button class="btn btn-secondary" (click)="previousStep()">
-      <i class="fas fa-arrow-left me-2"></i> Retour à la saisie
+      <i class="fas fa-arrow-left me-2"></i> Retour
     </button>
     
     <div>
@@ -374,7 +459,7 @@
         <i class="fas fa-times me-2"></i> Annuler
       </button>
       <button class="btn btn-success" (click)="saveDevis()">
-        <i class="fas fa-save me-2"></i> Mettre à jour le devis
+        <i class="fas fa-save me-2"></i> Mettre à jour
       </button>
     </div>
   </div>

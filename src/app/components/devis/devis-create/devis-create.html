@@ -1,7 +1,7 @@
 <div class="container-fluid">
   <div class="card">
     <div class="card-header">
-      <h4 class="card-title">Création de Devis</h4>
+      <h4 class="card-title">Création de Proforma</h4>
     </div>
     <div class="card-body">
 
@@ -105,56 +105,79 @@
 
         <hr>
 
-        <h5>Lignes de produits ou services <span class="text-danger">*</span></h5>
+        <div class="d-flex justify-content-between">
+          <h5>Lignes de produits ou services <span class="text-danger">*</span></h5>
+
+          <div class="mb-3 d-flex">
+            <label for="categorieSelect" class="form-label mr-3">Filtrer</label>
+            <select id="categorieSelect" class="form-select"
+                    [(ngModel)]="selectedCategorieId"
+                    (ngModelChange)="onCategorieFilterChange()">
+              <option [ngValue]="undefined">-- Toutes les catégories --</option>
+              <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.nom }}</option>
+            </select>
+          </div>
+        </div>
+
+        
         <div *ngIf="errors.lignes" class="alert alert-danger">
           {{ errors.lignes }}
         </div>
         
         <div *ngFor="let ligne of lignes; let i = index" class="row mb-2 align-items-center">
-  <div class="col-lg-3">
-    <select class="form-select" [class.is-invalid]="errors['ligne_' + i + '_designation']" 
-            [(ngModel)]="ligne.designationId" 
-            (change)="onDesignationChange(ligne, i)">
-      <option [ngValue]="null">-- Désignation --</option>
-      <option *ngFor="let d of designations" [ngValue]="d.id" [attr.data-prix]="d.prix_unitaire">
-        {{d.libelle}}
-      </option>
-    </select>
-    <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_designation']">
-      {{ errors['ligne_' + i + '_designation'] }}
-    </div>
-  </div>
-  <div class="col-lg-1">
-    <input type="number" class="form-control" [class.is-invalid]="errors['ligne_' + i + '_quantite']" 
-           placeholder="Qté" [(ngModel)]="ligne.quantite" (input)="onLineChange()" min="1">
-    <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_quantite']">
-      {{ errors['ligne_' + i + '_quantite'] }}
-    </div>
-  </div>
-  <div class="col-lg-2">
-    <input type="number" class="form-control" [class.is-invalid]="errors['ligne_' + i + '_prix']" 
-           placeholder="Prix Unitaire" [(ngModel)]="ligne.prix" (input)="onLineChange()" step="0.01" min="0">
-    <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_prix']">
-      {{ errors['ligne_' + i + '_prix'] }}
-    </div>
-  </div>
-  <div class="col-lg-1">
-    <input type="number" class="form-control" placeholder="Remise %" 
-           [(ngModel)]="ligne.remise" (input)="onLineChange()" min="0" max="100" step="0.01">
-  </div>
-  <div class="col-lg-2">
-    <input type="number" class="form-control" placeholder="PU Net" 
-           [value]="ligne.prixNet || 0" readonly>
-  </div>
-  <div class="col-lg-2">
-    <input type="number" class="form-control" placeholder="Total" 
-           [value]="ligne.total || 0" readonly>
-  </div>
-  <div class="col-lg-1">
-    <button class="btn btn-danger btn-sm" (click)="removeLine(i)">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
+              <div class="col-lg-3">
+                <label class="form-label">Désignations</label>
+                <select class="form-select"
+                [class.is-invalid]="errors['ligne_' + i + '_designation']"
+                [(ngModel)]="ligne.designationId"
+                (change)="onDesignationChange(ligne, i)">
+          <option [ngValue]="null">-- Désignation --</option>
+          <option *ngFor="let d of filteredDesignations" [ngValue]="d.id">
+            {{ d.libelle }}
+          </option>
+        </select>
+
+                <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_designation']">
+                  {{ errors['ligne_' + i + '_designation'] }}
+                </div>
+              </div>
+              <div class="col-lg-1">
+                <label class="form-label">Qte</label>
+                <input type="number" class="form-control" [class.is-invalid]="errors['ligne_' + i + '_quantite']" 
+                      placeholder="Qté" [(ngModel)]="ligne.quantite" (input)="onLineChange()" min="1">
+                <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_quantite']">
+                  {{ errors['ligne_' + i + '_quantite'] }}
+                </div>
+              </div>
+              <div class="col-lg-2">
+                <label class="form-label">PU</label>
+                <input type="number" class="form-control" [class.is-invalid]="errors['ligne_' + i + '_prix']" 
+                      placeholder="Prix Unitaire" [(ngModel)]="ligne.prix" (input)="onLineChange()" step="0.01" min="0">
+                <div class="invalid-feedback" *ngIf="errors['ligne_' + i + '_prix']">
+                  {{ errors['ligne_' + i + '_prix'] }}
+                </div>
+              </div>
+              <div class="col-lg-1">
+                <label class="form-label">Rem. %</label>
+                <input type="number" class="form-control" placeholder="Remise %" 
+                      [(ngModel)]="ligne.remise" (input)="onLineChange()" min="0" max="100" step="0.01">
+              </div>
+              <div class="col-lg-2">
+                <label class="form-label">PU NET</label>
+                <input type="number" class="form-control" placeholder="PU Net" 
+                      [value]="ligne.prixNet || 0" readonly>
+              </div>
+              <div class="col-lg-2">
+                <label class="form-label">Total</label>
+                <input type="number" class="form-control" placeholder="Total" 
+                      [value]="ligne.total || 0" readonly>
+              </div>
+              <div class="col-lg-1">
+                
+                <button class="btn btn-danger btn-sm mt-3" (click)="removeLine(i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
         </div>
         
         <button class="btn btn-primary mt-2" (click)="addLine()">
@@ -255,6 +278,14 @@
         </div>
 
         <hr>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <label class="form-label">Notes</label>
+            <input type="text" class="form-control"[(ngModel)]="notes">
+          </div>
+        </div>
+        <hr>
         <button class="btn btn-success mt-3" (click)="nextStep()">
           <i class="fas fa-arrow-right"></i> Suivant
         </button>
@@ -351,7 +382,7 @@
             <i class="fas fa-arrow-left"></i> Précédent
           </button>
           <button class="btn btn-success" (click)="saveDevis()">
-            <i class="fas fa-save"></i> Enregistrer le devis
+            <i class="fas fa-save"></i> Enregistrer la Proforma
           </button>
         </div>
       </div>

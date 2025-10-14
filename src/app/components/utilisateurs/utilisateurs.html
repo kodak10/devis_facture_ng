@@ -1,21 +1,5 @@
 <div class="container-fluid">
 
-  <!-- Toast Notification -->
-  <div *ngIf="showToast" 
-       class="toast-container position-fixed top-0 end-0 p-3"
-       style="z-index: 9999;">
-    <div [class]="toastType === 'success' ? 'toast align-items-center text-bg-success border-0' : 'toast align-items-center text-bg-danger border-0'" 
-         role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          <i [class]="toastType === 'success' ? 'bx bx-check-circle me-2' : 'bx bx-error-circle me-2'"></i>
-          {{ toastMessage }}
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" 
-                (click)="showToast = false"></button>
-      </div>
-    </div>
-  </div>
 
   <!-- start page title -->
   <div class="row">
@@ -123,7 +107,7 @@
   <!-- modal for create/edit -->
   <ng-template #userModal let-modal>
     <div class="modal-header">
-      <h5 class="modal-title">{{ selectedUser?.id ? "Modification d'Utilisateur" : 'Nouveau Utilisateur' }}</h5>
+      <h5 class="modal-title">{{ selectedUser.id ? "Modification d'Utilisateur" : 'Nouveau Utilisateur' }}</h5>
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
     </div>
     <div class="modal-body">
@@ -132,14 +116,14 @@
           <div class="col-lg-6">
             <div class="mb-3">
               <label class="form-label">Nom</label>
-              <input type="text" class="form-control" name="name" [(ngModel)]="formUser.name" required [readonly]="selectedUser?.id">
+              <input type="text" class="form-control" name="name" [(ngModel)]="formUser.name" required [readonly]="selectedUser.id">
               <div class="text-danger" *ngIf="errors?.name">{{ errors.name[0] }}</div>
             </div>
           </div>
           <div class="col-lg-6">
             <div class="mb-3">
               <label class="form-label">Email</label>
-              <input type="email" class="form-control" name="email" [(ngModel)]="formUser.email" required [readonly]="selectedUser?.id">
+              <input type="email" class="form-control" name="email" [(ngModel)]="formUser.email" required [readonly]="selectedUser.id">
               <div class="text-danger" *ngIf="errors?.email">{{ errors.email[0] }}</div>
             </div>
           </div>
@@ -149,7 +133,7 @@
           <div class="col-lg-6">
             <div class="mb-3">
               <label class="form-label">Téléphone</label>
-              <input type="text" class="form-control" name="phone" [(ngModel)]="formUser.phone" [readonly]="selectedUser?.id">
+              <input type="text" class="form-control" name="phone" [(ngModel)]="formUser.phone" [readonly]="selectedUser.id">
               <div class="text-danger" *ngIf="errors?.phone">{{ errors.phone[0] }}</div>
             </div>
           </div>
@@ -196,7 +180,7 @@
 
         <div class="d-flex justify-content-end gap-2 mt-4">
           <button type="button" class="btn btn-light" (click)="modal.dismiss()">Annuler</button>
-          <button type="submit" class="btn btn-primary">{{ selectedUser?.id ? 'Modifier' : 'Créer' }}</button>
+          <button type="submit" class="btn btn-primary">{{ selectedUser.id ? 'Modifier' : 'Créer' }}</button>
         </div>
       </form>
     </div>

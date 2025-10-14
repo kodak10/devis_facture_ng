@@ -1,6 +1,6 @@
 // services/devis.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface DevisLigne {
@@ -15,6 +15,7 @@ export interface DevisLigne {
     libelle: string;
     prix_unitaire: number;
   };
+
 }
 
 export interface DevisCreate {
@@ -40,12 +41,15 @@ export interface DevisCreate {
   total_ttc?: number;
   acompte?: number;
   solde?: number;
+
 }
 
 export interface Devis extends DevisCreate {
   id: number;
   date?: string;
   client_name?: string;
+  user_name?: string;
+  pays_name?: string;
   total_ht: number;
   tva: number;
   total_ttc: number;
@@ -58,7 +62,6 @@ export interface Devis extends DevisCreate {
   delai_de?: number;
   delai_a?: number;
   lignes?: DevisLigne[];
-  // Ajouter tous les champs qui peuvent être retournés par l'API
   pdf_path?: string;
   pays_id?: number;
   user_id?: number;
@@ -67,39 +70,73 @@ export interface Devis extends DevisCreate {
   created_at?: string;
   updated_at?: string;
   banque_name?: string;
+  notes?: string;
+
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class DevisService {
-  private apiUrl = 'http://127.0.0.1:8000/api/devis';
-  // private apiUrl = 'http://192.168.1.13:8000/api/devis';
+  // private apiUrl = 'http://127.0.0.1:8000/api/devis';
+  private apiUrl = 'http://192.168.1.13:8000/api/devis';
 
   constructor(private http: HttpClient) {}
 
-  getDevis(): Observable<Devis[]> {
-    return this.http.get<Devis[]>(this.apiUrl);
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
+  getDevis(filters?: { date_debut?: string; date_fin?: string }): Observable<Devis[]> {
+    let params = new HttpParams();
+
+    if (filters?.date_debut) {
+      params = params.set('date_debut', filters.date_debut);
+    }
+
+    if (filters?.date_fin) {
+      params = params.set('date_fin', filters.date_fin);
+    }
+
+    return this.http.get<Devis[]>(this.apiUrl, { params, ...this.getHeaders() },);
   }
 
   createDevis(devis: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, devis);
+    return this.http.post<any>(this.apiUrl, devis, this.getHeaders());
   }
 
   getDevisById(id: number): Observable<Devis> {
-    return this.http.get<Devis>(`${this.apiUrl}/${id}`);
+    return this.http.get<Devis>(`${this.apiUrl}/${id}`, this.getHeaders());
   }
 
   updateDevis(devis: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${devis.id}`, devis);
+    return this.http.put<any>(`${this.apiUrl}/${devis.id}`, devis, this.getHeaders());
   }
 
-getPdfUrl(devisId: number): void {
-  const url = `${this.apiUrl}/${devisId}/pdf`;
-  window.open(url, '_blank'); // ouvre dans un nouvel onglet
-}
+  updateStatut(id: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/send-devis`, {}, this.getHeaders());
+  }
+
+  refuseProforma(id: number, message: string): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/refuse-devis`, { message }, this.getHeaders());
+  }
+
+  getSuivi(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/devis', '')}/suivi`, this.getHeaders());
+  }
+
+  getPdfUrl(devisId: number): void {
+    const url = `${this.apiUrl}/${devisId}/pdf`;
+    window.open(url, '_blank'); // ouvre dans un nouvel onglet
+  }
 
   deleteDevis(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`, this.getHeaders());
   }
+
 }

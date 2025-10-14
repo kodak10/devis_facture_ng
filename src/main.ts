@@ -14,7 +14,7 @@ bootstrapApplication(AppComponent, {
       HttpClientModule,
       BrowserAnimationsModule,
       ToastrModule.forRoot({
-        positionClass: 'toast-top-left',
+        positionClass: 'toast-top-right',
         preventDuplicates: true,
       })
     )

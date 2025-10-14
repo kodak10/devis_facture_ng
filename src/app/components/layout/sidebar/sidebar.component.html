@@ -1,45 +1,57 @@
- <!-- ========== Left Sidebar Start ========== -->
-            <div class="vertical-menu">
+<div class="vertical-menu">
+  <div data-simplebar class="h-100">
+    <!-- Sidebar -->
+    <div id="sidebar-menu">
+      <ul class="metismenu list-unstyled" id="side-menu">
 
-                <div data-simplebar class="h-100">
+        <li class="menu-title" data-key="t-menu">Menu</li>
 
-                    <!--- Sidemenu -->
-                    <div id="sidebar-menu">
-                        <!-- Left Menu Start -->
-                        <ul class="metismenu list-unstyled" id="side-menu">
-                            <li class="menu-title" data-key="t-menu">Menu</li>
+        <!-- Tableau de bord -->
+        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <a routerLink="/dashboard">
+            <i data-feather="home"></i>
+            <span data-key="t-dashboard">Accueil</span>
+          </a>
+        </li>
 
-                            <li>
-                                <a routerLink="/dashboard">
-                                    <i data-feather="home"></i>
-                                    <span data-key="t-dashboard">Accueil</span>
-                                </a>
-                            </li>
+        <!-- PROFORMA -->
+        <li>
+          <a href="javascript:void(0);" class="has-arrow">
+            <i data-feather="file-text"></i>
+            <span>Proforma</span>
+          </a>
+          <ul class="sub-menu" aria-expanded="false">
+            <li routerLinkActive="active"><a routerLink="/devis/create"><i data-feather="plus-circle"></i> Créer</a></li>
+            <li routerLinkActive="active"><a routerLink="/devis"><i data-feather="list"></i> Liste</a></li>
+            <li routerLinkActive="active"><a routerLink="/devis/suivi"><i data-feather="activity"></i> Suivi</a></li>
+          </ul>
+        </li>
 
-                             <li>
-                                <a href="javascript: void(0);" class="has-arrow">
-                                    <i data-feather="users"></i>
-                                    <span data-key="t-authentication">Devis</span>
-                                </a>
-                                <ul class="sub-menu" aria-expanded="false">
-                                    <li><a routerLink="/devis/create" data-key="t-login">Créer</a></li>
-                                    <li><a routerLink="/devis" data-key="t-register">Liste</a></li>
-                                    <li><a href="auth-recoverpw.html" data-key="t-recover-password">Suivi</a></li>
-                                </ul>
-                            </li>
+        <!-- FACTURES -->
+        <li>
+          <a href="javascript:void(0);" class="has-arrow">
+            <i data-feather="file-invoice"></i>
+            <span>Factures</span>
+          </a>
+          <ul class="sub-menu" aria-expanded="false">
+            <li routerLinkActive="active"><a routerLink="/factures/create"><i data-feather="plus-circle"></i> Créer</a></li>
+            <li routerLinkActive="active"><a routerLink="/factures"><i data-feather="list"></i> Liste</a></li>
+            <li routerLinkActive="active"><a routerLink="/factures/suivi"><i data-feather="activity"></i> Suivi</a></li>
+            <li routerLinkActive="active"><a routerLink="/factures/paiement"><i data-feather="dollar-sign"></i> Règlements</a></li>
+          </ul>
+        </li>
 
-                            <li>
-                                <a href="javascript: void(0);" class="has-arrow">
-                                    <i data-feather="users"></i>
-                                    <span data-key="t-authentication">Factures</span>
-                                </a>
-                                <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="auth-login.html" data-key="t-login">Créer</a></li>
-                                    <li><a href="auth-register.html" data-key="t-register">Liste</a></li>
-                                    <li><a href="auth-recoverpw.html" data-key="t-recover-password">Paiement</a></li>
-                                </ul>
-                            </li>
-
+        <!-- COMPTABILITÉ -->
+        <li>
+          <a href="javascript:void(0);" class="has-arrow">
+            <i data-feather="bar-chart-2"></i>
+            <span>Comptabilité & Report</span>
+          </a>
+          <ul class="sub-menu" aria-expanded="false">
+            <li><a routerLink="/comptabilite/journal"><i data-feather="book-open"></i> Journal Comptable</a></li>
+            <li><a routerLink="/comptabilite/report"><i data-feather="pie-chart"></i> Report Financier</a></li>
+          </ul>
+        </li>
                             <li>
                                 <a href="javascript: void(0);" class="has-arrow">
                                     <i data-feather="users"></i>
@@ -62,30 +74,36 @@
                                     <li><a href="pages-maintenance.html" data-key="t-maintenance">Report Financier</a></li>
                                 </ul>
                             </li>
+        <!-- PARAMÈTRAGE -->
+        <li class="menu-title mt-2" data-key="t-components">Paramétrage</li>
 
-                            <li class="menu-title mt-2" data-key="t-components">Parametrage</li>
+        <li routerLinkActive="active">
+          <a routerLink="/designations">
+            <i data-feather="package"></i>
+            <span>Produits & Services</span>
+          </a>
+        </li>
 
-                            <li>
-                                <a routerLink="/designations">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Produits & Services</span>
-                                </a>
-                            </li>
+        <li routerLinkActive="active">
+          <a routerLink="/clients">
+            <i data-feather="users"></i>
+            <span>Clients</span>
+          </a>
+        </li>
 
-                            <li>
-                                <a routerLink="/clients">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Clients</span>
-                                </a>
-                            </li>
+        <li routerLinkActive="active">
+          <a routerLink="/banques">
+            <i data-feather="credit-card"></i>
+            <span>Banques</span>
+          </a>
+        </li>
 
-                            <li>
-                                <a routerLink="/banques">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Banque</span>
-                                </a>
-                            </li>
-
+        <li routerLinkActive="active">
+          <a routerLink="/utilisateurs">
+            <i data-feather="user-check"></i>
+            <span>Utilisateurs</span>
+          </a>
+        </li>
                             <li>
                                 <a routerLink="/absences">
                                     <i data-feather="layout"></i>
@@ -127,14 +145,19 @@
                                     <span data-key="t-settings">Configuration Générale</span>
                                 </a>
                             </li>
-
-
-
-
-
                         </ul>
                     </div>
                     <!-- Sidebar -->
                 </div>
             </div>
             <!-- Left Sidebar End -->
+        <li routerLinkActive="active">
+          <a routerLink="/configuration-generale">
+            <i data-feather="settings"></i>
+            <span>Configuration Générale</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
