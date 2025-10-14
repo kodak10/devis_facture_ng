@@ -17,13 +17,15 @@ import { ToastrService } from 'ngx-toastr';
 export class DesignationsComponent implements OnInit, AfterViewInit, OnDestroy {
   designations: Designation[] = [];
   selectedDesignation: Designation = {} as Designation;
-  formDesignation: Designation = {} as Designation;
+  formDesignation: Designation & { categorie_id?: number } = {} as any;
+  categories: any[] = []; // Liste des catégories pour le select
 
   errors: any = {};
   generalError: string = '';
 
   dataTable: any;
   isDataTableInitialized = false;
+
 
   @ViewChild('designationsTable', { static: false }) table!: ElementRef;
 
@@ -34,6 +36,7 @@ export class DesignationsComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.loadCategories();
     this.loadDesignations();
   }
 
@@ -100,6 +103,18 @@ export class DesignationsComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 100);
   }
 
+  loadCategories() {
+    this.designationService.getCategories().subscribe({
+        next: (res) => { 
+            this.categories = res; // directement le tableau
+        },
+        error: (err) => { 
+            console.error(err); 
+        }
+    });
+  }
+
+
   loadDesignations() {
     this.designationService.getDesignations().subscribe({
       next: (res) => {
@@ -165,6 +180,8 @@ export class DesignationsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
+
+  
 
   deleteDesignation(id?: number) {
     if (!id) return;

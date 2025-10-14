@@ -1,15 +1,16 @@
 import { Component, OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { UtilisateurService, User } from '../../services/utilisateur.service';
-import { NgbModal, NgbModalModule, NgbToast } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastrService, ToastrModule } from 'ngx-toastr';
 
 declare var $: any;
 
 @Component({
   selector: 'app-utilisateurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbModalModule, NgbToast],
+  imports: [CommonModule, FormsModule, NgbModalModule],
   templateUrl: './utilisateurs.html',
   styleUrls: ['./utilisateurs.scss']
 })
@@ -20,21 +21,19 @@ export class UtilisateursComponent implements OnInit {
   totalUsers = 0;
   pages: number[] = [];
   selectedUser: User = {} as User;
+  formUser: User = {} as User;
+
   errors: any = {};
   countries: any[] = [];
   roles: any[] = [];
   isLoading = true;
-  formUser: any = {};
+  //formUser: any = {};
 
-  // Toast
-  showToast = false;
-  toastMessage = '';
-  toastType: 'success' | 'error' = 'success';
 
   rolesSelect2Instance: any = null;
   paysSelect2Instance: any = null;
 
-  constructor(private utilisateurService: UtilisateurService, private modalService: NgbModal) {}
+  constructor(private utilisateurService: UtilisateurService, private modalService: NgbModal, private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -42,16 +41,7 @@ export class UtilisateursComponent implements OnInit {
     this.loadPays();
   }
 
-  showNotification(message: string, type: 'success' | 'error' = 'success') {
-    this.toastMessage = message;
-    this.toastType = type;
-    this.showToast = true;
-    
-    // cacher après 5 secondes
-    setTimeout(() => {
-      this.showToast = false;
-    }, 5000);
-  }
+  
 
   loadRoles() {
     this.utilisateurService.getRoles().subscribe(res => {
@@ -193,23 +183,12 @@ export class UtilisateursComponent implements OnInit {
 
     request.subscribe({
       next: (res) => {
-        console.log(this.selectedUser.id ? 'Update réussi :' : 'Création réussie :', res);
-        this.modalService.dismissAll();
-        this.loadUsers();
-        this.showNotification(
-          this.selectedUser.id 
-            ? 'Utilisateur modifié avec succès' 
-            : 'Utilisateur créé avec succès',
-          'success'
-        );
+        this.toastr.success('Enregistré avec succès', 'Succès');
+        
       },
-      error: (err) => {
-        console.error('Erreur :', err);
-        this.errors = err.error.errors;
-        this.showNotification(
-          'Erreur lors de l\'opération',
-          'error'
-        );
+      error: (err : any) => {
+        console.error(err);
+        this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur');
       }
     });
   }
@@ -220,13 +199,12 @@ export class UtilisateursComponent implements OnInit {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
     
     this.utilisateurService.deleteUser(userId).subscribe({
-      next: () => {
-        this.loadUsers();
-        this.showNotification('Utilisateur supprimé avec succès', 'success');
+      next: (res) => {
+        this.toastr.success(res.message, 'Succès');
       },
       error: (err) => {
-        console.error('Erreur suppression:', err);
-        this.showNotification('Erreur lors de la suppression', 'error');
+        console.error(err);
+        this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur');
       }
     });
   }

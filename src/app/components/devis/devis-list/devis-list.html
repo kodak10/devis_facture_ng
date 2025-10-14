@@ -1,0 +1,129 @@
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4>Liste des Proforma</h4>
+      <a class="btn btn-primary" routerLink="/devis/create">
+        <i class="fas fa-plus me-2"></i>Ajouter
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtres par période -->
+  <div class="card border-0 mb-3">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="dateDebut" class="form-label">Date de début</label>
+          <input type="date" 
+                 id="dateDebut" 
+                 class="form-control" 
+                 [(ngModel)]="dateDebut"
+                 (change)="onDateFilterChange()">
+        </div>
+        <div class="col-md-3">
+          <label for="dateFin" class="form-label">Date de fin</label>
+          <input type="date" 
+                 id="dateFin" 
+                 class="form-control" 
+                 [(ngModel)]="dateFin"
+                 (change)="onDateFilterChange()">
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary" 
+                  (click)="resetFilters()"
+                  [disabled]="!dateDebut && !dateFin">
+            <i class="fas fa-times me-2"></i>Réinitialiser
+          </button>
+        </div>
+        <div class="col-md-3 text-end">
+          <span class="text-muted" *ngIf="devisList.length > 0">
+            {{ devisList.length }} devis trouvé(s)
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des devis -->
+  <div class="card border-0">
+    <div class="card-body">
+      <!-- Indicateur de chargement -->
+      <div *ngIf="isLoading" class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-2">Chargement des devis...</p>
+      </div>
+
+      <!-- Message si aucun résultat -->
+      <div *ngIf="!isLoading && devisList.length === 0" class="text-center py-4">
+        <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+        <p class="text-muted">Aucune Proforma trouvée pour la période sélectionnée.</p>
+        <button *ngIf="dateDebut || dateFin" 
+                class="btn btn-primary" 
+                (click)="resetFilters()">
+          Voir tous les proforma
+        </button>
+      </div>
+
+      <!-- Tableau des devis -->
+      <div *ngIf="!isLoading && devisList.length > 0" class="table-responsive">
+        <table id="devisTable" class="table table-bordered table-striped w-100">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Client</th>
+              <th>Emission</th>
+              <th>Echéance</th>
+              <th>Total TTC</th>
+              <th>Status</th>
+              <th>Pays</th>
+              <th>Par</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of devisList">
+              <td>{{ d.date | date: 'dd-MM-yyyy'}}</td>
+              <td>{{ d.client_name || d.client_id }}</td>
+              <td>{{ d.date_emission | date:'dd-MM-yyyy' }}</td>
+              <td>{{ d.date_echeance | date:'dd-MM-yyyy' }}</td>
+              <td class="text-end">{{ d.total_ttc | number:'1.2-2' }}</td>
+              <td>
+                <span [class]="getStatusBadgeClass(d.status)" class="badge">
+                  {{ d.status }}
+                </span>
+              </td>
+              <td>{{ d.pays_name }}</td>
+              <td>{{ d.user_name }}</td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-info btn-sm me-1" 
+                          (click)="getPdfUrl(d.id)"
+                          title="Ouvrir la Proforma">
+                    <i class="fas fa-file-pdf"></i>
+                  </button>
+                  <button class="btn btn-warning btn-sm me-1" 
+                        [routerLink]="['/devis/edit', d.id]"
+                        title="Modifier la Proforma">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-success btn-sm me-1" 
+                        (click)="updateStatut(d.id)"
+                        title="Valider la Proforma">
+                    <i class="fas fa-check-circle"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm" 
+                          (click)="deleteDevis(d.id)"
+                          title="Supprimer la Proforma">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

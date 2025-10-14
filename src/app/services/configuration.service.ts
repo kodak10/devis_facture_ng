@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface ConfigurationGenerale {
@@ -15,12 +15,21 @@ export interface ConfigurationGenerale {
 @Injectable({ providedIn: 'root' })
 export class ConfigurationGeneraleService {
   // private apiUrl = 'http://localhost:8000/api/entreprise';
-  private apiUrl = 'http://192.168.1.13:8000/api/entreprise';
+  private apiUrl = 'http://192.168.1.75:8000/api/entreprise';
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+      const token = localStorage.getItem('token');
+      return {
+        headers: new HttpHeaders({
+          Authorization: token ? `Bearer ${token}` : ''
+        })
+      };
+    }
+
   getConfigurationGenerale(): Observable<ConfigurationGenerale> {
-    return this.http.get<ConfigurationGenerale>(this.apiUrl);
+    return this.http.get<ConfigurationGenerale>(this.apiUrl, this.getHeaders());
   }
 
   updateConfigurationGenerale(data: ConfigurationGenerale, file?: File): Observable<any> {
@@ -36,7 +45,7 @@ export class ConfigurationGeneraleService {
     formData.append('logo', file, file.name);
   }
 
-  return this.http.post<any>(this.apiUrl, formData);
+  return this.http.post<any>(this.apiUrl, formData, this.getHeaders());
 }
 
 

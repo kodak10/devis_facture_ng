@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { DevisService, Devis } from '../../../../services/devis.service';
-import { DeviseService, Devise, TauxChange } from '../../../../services/devise.service';
-import { ClientService, Client } from '../../../../services/client.service';
-import { DesignationService, Designation } from '../../../../services/designation.service';
-import { BanqueService, Banque } from '../../../../services/banque.service';
+import { DevisService, Devis } from '../../../services/devis.service';
+import { DeviseService, Devise, TauxChange } from '../../../services/devise.service';
+import { ClientService, Client } from '../../../services/client.service';
+import { DesignationService, Designation, Categorie } from '../../../services/designation.service';
+import { BanqueService, Banque } from '../../../services/banque.service';
 
 // Fonction round helper
 function round(value: number, decimals: number = 2): number {
@@ -25,8 +25,9 @@ export class DevisEditComponent implements OnInit {
   devisId!: number;
   devis: Devis = {} as Devis;
 
-  // Wizard
-  step = 1;
+  // Wizard - changer le type pour string pour éviter l'erreur de comparaison
+  
+  step: number = 1;
 
   // Propriétés pour les devises
   devises: Devise[] = [];
@@ -68,12 +69,15 @@ export class DevisEditComponent implements OnInit {
     remise?: number;
     prixNet?: number;
     total?: number;
+    categorieId?: number;
   }[] = [];
 
   // Données pour selects
   clients: Client[] = [];
   banques: Banque[] = [];
   designations: Designation[] = [];
+  categories: Categorie[] = [];
+  selectedCategorieId?: number;
 
   // Validation
   errors: any = {};
@@ -97,81 +101,84 @@ export class DevisEditComponent implements OnInit {
     this.loadBanques();
     this.loadDesignations();
     this.loadDevises();
+    this.loadCategories();
   }
 
   loadDevis() {
     this.isLoading = true;
     
-    // Une seule requête pour tout charger
     this.devisService.getDevisById(this.devisId).subscribe({
       next: (devis: Devis) => {
-        console.log('Devis complet chargé:', devis);
         this.devis = devis;
         this.populateForm();
         this.isLoading = false;
       },
       error: (error: any) => {
-        console.error('Erreur chargement devis:', error);
-        this.toastr.error('Erreur lors du chargement du devis', 'Erreur');
+        console.error(error);
+        this.toastr.error(error.error?.message || 'Erreur serveur', 'Erreur');
         this.isLoading = false;
       }
     });
   }
 
- // Dans devis-edit.component.ts
-populateForm() {
-  console.log('Devis reçu:', this.devis);
-  console.log('Lignes reçues:', this.devis.lignes);
+  populateForm() {
+    // Remplir tous les champs du formulaire avec des valeurs par défaut sécurisées
+    this.dateEcheance = this.formatDateForInput(this.devis.date_echeance) || '';
+    this.dateDemission = this.formatDateForInput(this.devis.date_emission) || '';
+    this.clientId = this.devis.client_id || null;
+    this.banqueId = this.devis.banque_id || null;
+    this.devise = this.devis.devise || 'XOF';
+    this.taux = Number(this.devis.taux) || 1;
+    this.tva = Number(this.devis.tva) || 18;
+    this.tvaActive = Number(this.devis.tva) > 0;
+    this.commande = Number(this.devis.commande) || 0;
+    this.livraison = Number(this.devis.livraison) || 0;
+    this.validiteOffre = Number(this.devis.validite) || 30;
+    this.delaiType = this.devis.delai_type || 'jours';
+    this.delaiJours = Number(this.devis.delai_jours) || 0;
+    this.delaiDe = Number(this.devis.delai_de) || 0;
+    this.delaiA = Number(this.devis.delai_a) || 0;
+    
+    // Charger les lignes directement depuis this.devis.lignes
+    if (this.devis.lignes && this.devis.lignes.length > 0) {
+      console.log('Lignes chargées depuis devis:', this.devis.lignes);
+      this.lignes = this.devis.lignes.map(ligne => ({
+        designationId: ligne.designation_id,
+        quantite: Number(ligne.quantite) || 1,
+        prix: Number(ligne.prix_unitaire) || 0,
+        remise: Number(ligne.remise) || 0,
+        prixNet: Number(ligne.prix_net) || 0,
+        total: Number(ligne.total) || 0,
+        // Récupérer la catégorie depuis la désignation
+        categorieId: this.getCategorieIdFromDesignation(ligne.designation_id)
+      }));
+    } else {
+      console.warn('Aucune ligne trouvée dans le devis');
+      this.lignes = [];
+    }
 
-  // Remplir tous les champs du formulaire avec des valeurs par défaut sécurisées
-  this.dateEcheance = this.formatDateForInput(this.devis.date_echeance) || '';
-  this.dateDemission = this.formatDateForInput(this.devis.date_emission) || '';
-  this.clientId = this.devis.client_id || null;
-  this.banqueId = this.devis.banque_id || null;
-  this.devise = this.devis.devise || 'XOF';
-  this.taux = Number(this.devis.taux) || 1;
-  this.tva = Number(this.devis.tva) || 18;
-  this.tvaActive = Number(this.devis.tva) > 0;
-  this.commande = Number(this.devis.commande) || 0;
-  this.livraison = Number(this.devis.livraison) || 0;
-  this.validiteOffre = Number(this.devis.validite) || 30;
-  this.delaiType = this.devis.delai_type || 'jours';
-  this.delaiJours = Number(this.devis.delai_jours) || 0;
-  this.delaiDe = Number(this.devis.delai_de) || 0;
-  this.delaiA = Number(this.devis.delai_a) || 0;
-  
-  // Charger les lignes directement depuis this.devis.lignes
-  if (this.devis.lignes && this.devis.lignes.length > 0) {
-    console.log('Lignes chargées depuis devis:', this.devis.lignes);
-    this.lignes = this.devis.lignes.map(ligne => ({
-      designationId: ligne.designation_id,
-      quantite: Number(ligne.quantite) || 1,
-      prix: Number(ligne.prix_unitaire) || 0,
-      remise: Number(ligne.remise) || 0,
-      prixNet: Number(ligne.prix_net) || 0,
-      total: Number(ligne.total) || 0
-    }));
-  } else {
-    console.warn('Aucune ligne trouvée dans le devis');
-    this.lignes = [];
+    this.calculateTotals();
   }
 
-  console.log('Lignes transformées:', this.lignes);
-  this.calculateTotals();
-}
-
-// Ajouter cette méthode pour formater les dates
-formatDateForInput(dateString: string): string {
-  if (!dateString) return '';
-  
-  try {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
-  } catch (error) {
-    console.error('Erreur formatage date:', error);
-    return '';
+  // Méthode pour récupérer la catégorie d'une désignation
+  getCategorieIdFromDesignation(designationId?: number): number | undefined {
+    if (!designationId) return undefined;
+    const designation = this.designations.find(d => d.id === designationId);
+    return designation?.categorie_id;
   }
-}
+
+  // Ajouter cette méthode pour formater les dates
+  formatDateForInput(dateString: string): string {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Erreur formatage date:', error);
+      return '';
+    }
+  }
 
   loadDevises() {
     this.deviseService.getDevises().subscribe({
@@ -180,6 +187,17 @@ formatDateForInput(dateString: string): string {
       },
       error: (error: any) => {
         console.error('Erreur chargement devises:', error);
+      }
+    });
+  }
+
+  loadCategories() {
+    this.designationService.getCategories().subscribe({
+      next: (res) => {
+        this.categories = res;
+      },
+      error: (error: any) => {
+        console.error('Erreur chargement catégories:', error);
       }
     });
   }
@@ -251,11 +269,25 @@ formatDateForInput(dateString: string): string {
     return `1 ${this.deviseDepart} = ${this.taux} ${this.devise}`;
   }
 
+  // Méthode pour le changement de filtre de catégorie global
+  onCategorieFilterChange() {
+    // Ne réinitialise pas les lignes existantes, seulement met à jour l'affichage
+    this.calculateTotals();
+  }
+
+  // Méthode pour filtrer les désignations selon la catégorie sélectionnée
+  filteredDesignations(): Designation[] {
+    if (!this.selectedCategorieId) return this.designations;
+    return this.designations.filter(d => d.categorie_id === this.selectedCategorieId);
+  }
+
   onDesignationChange(ligne: any, index: number) {
     if (ligne.designationId) {
       const designation = this.designations.find(d => d.id === ligne.designationId);
       if (designation && designation.prix_unitaire) {
         ligne.prix = this.calculatePriceWithTaux(designation.prix_unitaire);
+        // Associe automatiquement la catégorie de la désignation
+        ligne.categorieId = designation.categorie_id;
         this.calculateLineTotal(ligne);
         this.calculateTotals();
       }
@@ -279,11 +311,26 @@ formatDateForInput(dateString: string): string {
   }
 
   loadDesignations() {
-    this.designationService.getDesignations().subscribe(res => this.designations = res.data ?? res);
+    this.designationService.getDesignations().subscribe(res => {
+      this.designations = res.data ?? res;
+      // Mettre à jour les catégories des lignes existantes après chargement des désignations
+      this.lignes.forEach(ligne => {
+        if (ligne.designationId && !ligne.categorieId) {
+          ligne.categorieId = this.getCategorieIdFromDesignation(ligne.designationId);
+        }
+      });
+    });
   }
 
   addLine() {
-    this.lignes.push({ quantite: 1, remise: 0, prix: 0, prixNet: 0, total: 0 });
+    this.lignes.push({ 
+      quantite: 1, 
+      remise: 0, 
+      prix: 0, 
+      prixNet: 0, 
+      total: 0,
+      categorieId: this.selectedCategorieId // Associe la catégorie filtrée si elle est sélectionnée
+    });
   }
 
   removeLine(index: number) {
@@ -446,7 +493,7 @@ formatDateForInput(dateString: string): string {
 
     this.devisService.updateDevis({ ...payload, id: this.devisId }).subscribe({
       next: (response: any) => {
-        this.toastr.success('Devis mis à jour !', 'Succès');
+        this.toastr.success(response.message, 'Succès');
         
         if (response.pdf_url) {
           window.open(response.pdf_url, '_blank');
@@ -455,8 +502,8 @@ formatDateForInput(dateString: string): string {
         this.router.navigate(['/devis']);
       },
       error: (error: any) => {
-        console.error('Erreur:', error);
-        this.toastr.error('Erreur lors de la mise à jour.', 'Erreur');
+        console.error(error);
+        this.toastr.error(error.error?.message || 'Erreur serveur', 'Erreur');
       }
     });
   }

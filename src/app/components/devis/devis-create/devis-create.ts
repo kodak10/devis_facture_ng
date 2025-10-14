@@ -1,0 +1,471 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
+import { DevisService, Devis } from '../../../services/devis.service';
+import { ClientService, Client } from '../../../services/client.service';
+import { DesignationService, Designation, Categorie } from '../../../services/designation.service';
+import { BanqueService, Banque } from '../../../services/banque.service';
+import { DeviseService, Devise, TauxChange } from '../../../services/devise.service';
+
+// Fonction helper pour arrondir
+function round(value: number, decimals: number = 2): number {
+  return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals);
+}
+
+@Component({
+  selector: 'app-devis',
+  standalone: true,
+  imports: [CommonModule, FormsModule, NgbModalModule],
+  templateUrl: './devis-create.html',
+  styleUrls: ['./devis-create.scss']
+})
+export class DevisCreateComponent implements OnInit, OnDestroy {
+  // =====================
+  // Propriétés principales
+  // =====================
+  devisList: Devis[] = [];
+  selectedDevis: Devis = {} as Devis;
+  step = 1;
+
+  devises: Devise[] = [];
+  tauxChange: TauxChange = {};
+  deviseDepart: string = 'XOF';
+  tauxAuto: boolean = true;
+  devise: string = 'XOF';
+  taux: number = 1;
+
+  dateEcheance: string = '';
+  dateDemission: string = '';
+  clientId: number | null = null;
+  banqueId: number | null = null;
+  tva: number = 18;
+  tvaActive: boolean = true;
+  commande: number = 0;
+  livraison: number = 0;
+  validiteOffre: number = 30;
+  delaiType: string = 'jours';
+  delaiJours: number = 0;
+  delaiDe: number = 0;
+  delaiA: number = 0;
+
+  totalHT: number = 0;
+  totalTVA: number = 0;
+  totalTTC: number = 0;
+  acompte: number = 0;
+  solde: number = 0;
+
+  notes: string = 'Merci de nous consulter, veuillez trouver notre meilleure offre ';
+
+  lignes: { 
+    designationId?: number; 
+    quantite?: number; 
+    prix?: number;
+    remise?: number;
+    prixNet?: number;
+    total?: number;
+    categorieId?: number;
+  }[] = [];
+
+  clients: Client[] = [];
+  banques: Banque[] = [];
+  designations: Designation[] = [];
+  categories: Categorie[] = [];
+  selectedCategorieId?: number;
+
+  filteredDesignations: Designation[] = [];
+  errors: any = {};
+
+  constructor(
+    private devisService: DevisService,
+    private deviseService: DeviseService,
+    private modalService: NgbModal,
+    private toastr: ToastrService,
+    private clientService: ClientService,
+    private designationService: DesignationService,
+    private banqueService: BanqueService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadClients();
+    this.loadBanques();
+    this.loadCategories();
+    this.loadDevises();
+    setTimeout(() => this.loadTauxChange(), 1000);
+    
+    // Charger les designations d'abord
+    this.loadDesignations();
+  }
+
+  ngOnDestroy(): void {}
+
+  // =====================
+  // Chargement des données
+  // =====================
+  loadDevises() {
+    this.deviseService.getDevises().subscribe({
+      next: res => this.devises = res,
+      error: err => console.error('Erreur chargement devises:', err)
+    });
+  }
+
+  loadCategories() {
+    this.designationService.getCategories().subscribe({
+      next: res => this.categories = res,
+      error: err => console.error('Erreur chargement catégories:', err)
+    });
+  }
+
+  loadDesignations() {
+    this.designationService.getDesignations().subscribe({
+      next: res => {
+        this.designations = res.data ?? res;
+        this.updateFilteredDesignations(); // Mettre à jour après le chargement
+      },
+      error: err => console.error('Erreur chargement designations:', err)
+    });
+  }
+
+  loadClients() {
+    this.clientService.getClients().subscribe(res => this.clients = res);
+  }
+
+  loadBanques() {
+    this.banqueService.getBanques().subscribe(res => this.banques = res);
+  }
+
+
+  loadTauxChange() {
+    this.deviseService.getTauxChange().subscribe({
+      next: res => { this.tauxChange = res; this.calculateTaux(); },
+      error: err => { console.error('Erreur chargement taux:', err); this.loadTauxChangeDirect(); }
+    });
+  }
+
+  loadTauxChangeDirect() {
+    this.deviseService.getTauxChangeDirect().subscribe({
+      next: (res: any) => {
+        if (res.conversion_rates) {
+          Object.keys(res.conversion_rates).forEach(devise => {
+            this.tauxChange[devise] = round(1 / res.conversion_rates[devise], 4);
+          });
+          this.calculateTaux();
+        }
+      },
+      error: err => { console.error('Erreur API taux change:', err); this.taux = 1; }
+    });
+  }
+
+  // =====================
+  // Gestion des devises
+  // =====================
+  onDeviseChange() {
+    if (this.tauxAuto) this.calculateTaux();
+    this.calculateTotals();
+  }
+
+  onDeviseDepartChange() {
+    if (this.tauxAuto) this.calculateTaux();
+  }
+
+  calculateTaux() {
+    if (this.deviseDepart === this.devise) {
+      this.taux = 1;
+      return;
+    }
+    const taux = this.tauxChange[this.devise] || 1;
+    this.taux = taux;
+    this.updateAllPricesWithTaux();
+  }
+
+  updateAllPricesWithTaux() {
+    this.lignes.forEach(ligne => {
+      if (ligne.designationId) {
+        const d = this.designations.find(des => des.id === ligne.designationId);
+        if (d && d.prix_unitaire) {
+          ligne.prix = this.calculatePriceWithTaux(d.prix_unitaire);
+          this.calculateLineTotal(ligne);
+        }
+      }
+    });
+    this.calculateTotals();
+  }
+
+  calculatePriceWithTaux(prixOriginal: number): number {
+    return this.deviseDepart === this.devise ? prixOriginal : prixOriginal * this.taux;
+  }
+
+  getTauxDisplay(): string {
+    if (this.deviseDepart === this.devise) return `1 ${this.deviseDepart} = 1 ${this.devise}`;
+    return `1 ${this.devise} = ${(1 / this.taux).toFixed(2)} ${this.deviseDepart}`;
+  }
+
+  // =====================
+  // Gestion des lignes
+  // =====================
+  addLine() {
+    this.lignes.push({ 
+      quantite: 1, 
+      remise: 0, 
+      prix: 0, 
+      prixNet: 0, 
+      total: 0,
+      categorieId: this.selectedCategorieId // Associer la catégorie courante
+    });
+  }
+
+  removeLine(index: number) {
+    this.lignes.splice(index, 1);
+    this.calculateTotals();
+  }
+
+  onLineChange() {
+    setTimeout(() => this.calculateTotals(), 100);
+  }
+
+  onDesignationChange(ligne: any, index: number) {
+    if (ligne.designationId) {
+      const d = this.designations.find(des => des.id === ligne.designationId);
+      if (d && d.prix_unitaire) {
+        ligne.prix = this.calculatePriceWithTaux(d.prix_unitaire);
+        ligne.categorieId = d.categorie_id; // Associe automatiquement la catégorie
+        this.calculateLineTotal(ligne);
+        this.calculateTotals();
+      }
+    }
+    this.errors[`ligne_${index}_designation`] = '';
+  }
+
+  updateFilteredDesignations() {
+    if (!this.selectedCategorieId) {
+      this.filteredDesignations = this.designations;
+    } else {
+      this.filteredDesignations = this.designations.filter(d => d.categorie_id === this.selectedCategorieId);
+    }
+  }
+
+  onCategorieFilterChange() {
+    this.updateFilteredDesignations();
+    
+    // Mettre à jour les catégories des lignes existantes si nécessaire
+    // this.lignes.forEach(ligne => {
+    //   if (!ligne.categorieId) {
+    //     ligne.categorieId = this.selectedCategorieId;
+    //   }
+    // });
+  }
+
+  // Nouvelle méthode pour obtenir les designations filtrées par ligne
+  getFilteredDesignationsForLine(ligne: any): Designation[] {
+    if (!ligne.categorieId) {
+      return this.designations;
+    }
+    return this.designations.filter(d => d.categorie_id === ligne.categorieId);
+  }
+
+  onCategorieChange(index: number) {
+    const ligne = this.lignes[index];
+    if (ligne) {
+      const ancienneCategorieId = ligne.categorieId;
+      ligne.categorieId = this.selectedCategorieId;
+      
+      // Réinitialiser la désignation seulement si la catégorie a changé
+      if (ancienneCategorieId !== this.selectedCategorieId) {
+        ligne.designationId = undefined;
+        ligne.prix = 0;
+        ligne.prixNet = 0;
+        ligne.total = 0;
+        this.calculateTotals();
+      }
+    }
+  }
+
+  calculateLineTotal(ligne: any): number {
+    const quantite = ligne.quantite || 0;
+    const prix = ligne.prix || 0;
+    const remise = ligne.remise || 0;
+    const prixNet = prix * (1 - remise / 100);
+    ligne.prixNet = this.devise === 'XOF' ? Math.round(prixNet) : Number(prixNet.toFixed(2));
+    const total = quantite * prixNet;
+    ligne.total = this.devise === 'XOF' ? Math.round(total) : Number(total.toFixed(2));
+    return ligne.total;
+  }
+
+  calculateTotals() {
+    this.totalHT = this.lignes.reduce((sum, l) => sum + (this.calculateLineTotal(l) || 0), 0);
+    this.totalHT = this.devise === 'XOF' ? Math.round(this.totalHT) : Number(this.totalHT.toFixed(2));
+    this.totalTVA = this.tvaActive ? (this.totalHT * this.tva) / 100 : 0;
+    this.totalTVA = this.devise === 'XOF' ? Math.round(this.totalTVA) : Number(this.totalTVA.toFixed(2));
+    this.totalTTC = this.totalHT + this.totalTVA;
+    this.totalTTC = this.devise === 'XOF' ? Math.round(this.totalTTC) : Number(this.totalTTC.toFixed(2));
+    this.updateAcompte();
+  }
+
+  updateAcompte() {
+    this.acompte = (this.totalTTC * this.commande) / 100;
+    this.acompte = this.devise === 'XOF' ? Math.round(this.acompte) : Number(this.acompte.toFixed(2));
+    this.solde = this.totalTTC - this.acompte;
+    this.solde = this.devise === 'XOF' ? Math.round(this.solde) : Number(this.solde.toFixed(2));
+  }
+
+  onCommandeChange() {
+    this.commande = Math.max(0, Math.min(100, this.commande));
+    this.livraison = this.commande === 100 ? 0 : 100 - this.commande;
+    this.updateAcompte();
+  }
+
+  onLivraisonChange() {
+    this.livraison = Math.max(0, Math.min(100, this.livraison));
+    this.commande = this.livraison === 100 ? 0 : 100 - this.livraison;
+    this.updateAcompte();
+  }
+
+  // =====================
+  // Validation et sauvegarde
+  // =====================
+  validateStep1(): boolean {
+    this.errors = {};
+    if (!this.dateEcheance) this.errors.dateEcheance = 'La date d\'échéance est obligatoire';
+    if (!this.clientId) this.errors.clientId = 'Le client est obligatoire';
+    if (this.lignes.length === 0) this.errors.lignes = 'Au moins une ligne est requise';
+    this.lignes.forEach((l, i) => {
+      if (!l.designationId) this.errors[`ligne_${i}_designation`] = 'La désignation est obligatoire';
+      if (!l.quantite || l.quantite <= 0) this.errors[`ligne_${i}_quantite`] = 'La quantité doit être > 0';
+      if (!l.prix || l.prix < 0) this.errors[`ligne_${i}_prix`] = 'Le prix doit être positif';
+    });
+    return Object.keys(this.errors).length === 0;
+  }
+
+  nextStep() {
+    if (this.step === 1 && !this.validateStep1()) {
+      this.toastr.error('Veuillez corriger les erreurs dans le formulaire', 'Erreur de validation');
+      return;
+    }
+    if (this.step === 1) this.calculateTotals();
+    this.step++;
+  }
+
+  previousStep() {
+    this.step--;
+  }
+
+  saveDevis() {
+    if (!this.validateStep1()) {
+      this.toastr.error('Veuillez corriger les erreurs avant d\'enregistrer', 'Erreur de validation');
+      return;
+    }
+
+    const payload = {
+      generate_num_proforma: true,
+      devise_depart: this.deviseDepart,
+      devise: this.devise,
+      taux: this.taux,
+      date_echeance: this.dateEcheance,
+      date_emission: this.dateDemission || new Date().toISOString().split('T')[0],
+      client_id: this.clientId,
+      banque_id: this.banqueId,
+      tva: this.tvaActive ? this.tva : 0,
+      commande: this.commande,
+      livraison: this.livraison,
+      validite_offre: this.validiteOffre,
+      delai_type: this.delaiType,
+      delai_jours: this.delaiJours,
+      delai_de: this.delaiDe,
+      delai_a: this.delaiA,
+      total_ht: this.totalHT,
+      total_tva: this.totalTVA,
+      total_ttc: this.totalTTC,
+      acompte: this.acompte,
+      solde: this.solde,
+      notes: this.notes,
+      lignes: this.lignes.map(l => ({
+        designation_id: l.designationId,
+        quantite: l.quantite,
+        prix_unitaire: l.prix,
+        remise: l.remise,
+        prix_net: l.prixNet,
+        total: l.total,
+        categorie_id: l.categorieId
+      }))
+    };
+
+    const obs = this.selectedDevis.id
+      ? this.devisService.updateDevis({ ...payload, id: this.selectedDevis.id })
+      : this.devisService.createDevis(payload);
+
+    obs.subscribe({
+      next: res => {
+        this.toastr.success(res.message, 'Succès');
+        if (res.pdf_url) window.open(res.pdf_url, '_blank');
+        this.resetForm();
+      },
+      error: err => this.toastr.error(err.error?.message || 'Erreur serveur', 'Erreur')
+    });
+  }
+
+  resetForm() {
+    this.step = 1;
+    this.dateEcheance = '';
+    this.dateDemission = '';
+    this.clientId = null;
+    this.banqueId = null;
+    this.devise = 'XOF';
+    this.deviseDepart = 'XOF';
+    this.taux = 1;
+    this.tva = 18;
+    this.tvaActive = true;
+    this.commande = 0;
+    this.livraison = 0;
+    this.validiteOffre = 30;
+    this.delaiType = 'jours';
+    this.delaiJours = 0;
+    this.delaiDe = 0;
+    this.delaiA = 0;
+    this.totalHT = 0;
+    this.totalTVA = 0;
+    this.totalTTC = 0;
+    this.acompte = 0;
+    this.solde = 0;
+    this.lignes = [];
+    this.selectedDevis = {} as Devis;
+    this.errors = {};
+    this.selectedCategorieId = undefined;
+    this.updateFilteredDesignations();
+  }
+
+  getDelaiText(): string {
+    switch (this.delaiType) {
+      case 'jours':
+        return `${this.delaiJours} jours`;
+      case 'deja_livre':
+        return 'Déjà livré';
+      case 'planning':
+        return 'Selon planning du client';
+      case 'periode':
+        return `De ${this.delaiDe} à ${this.delaiA} jours`;
+      default:
+        return 'Non spécifié';
+    }
+  }
+
+  onTvaToggle() {
+    this.calculateTotals();
+  }
+
+  getClientName(): string {
+    const client = this.clients.find(c => c.id === this.clientId);
+    return client ? client.nom : 'Non spécifié';
+  }
+
+  getBanqueName(): string {
+    const banque = this.banques.find(b => b.id === this.banqueId);
+    return banque ? banque.name : 'Non spécifiée';
+  }
+
+  getDesignationName(designationId?: number): string {
+    if (!designationId) return 'Non spécifiée';
+    const designation = this.designations.find(d => d.id === designationId);
+    return designation ? designation.libelle : 'Non trouvée';
+  }
+}

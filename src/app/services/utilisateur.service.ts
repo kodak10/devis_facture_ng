@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Role {
@@ -28,33 +28,42 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class UtilisateurService {
   // private apiUrl = 'http://localhost:8000/api/users';
-  private apiUrl = 'http://192.168.1.13:8000/api/users';
+  private apiUrl = 'http://192.168.1.75:8000/api/users';
 
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+  
   getUsers(page: number = 1): Observable<any> {
-    return this.http.get(`${this.apiUrl}?page=${page}`);
+    return this.http.get(`${this.apiUrl}?page=${page}`, this.getHeaders());
   }
 
   getRoles(): Observable<Role[]> {
-    return this.http.get<Role[]>('http://localhost:8000/api/roles');
+    return this.http.get<Role[]>('http://192.168.1.75:8000/api/roles', this.getHeaders());
   }
 
   getPays(): Observable<Pays[]> {
-    return this.http.get<Pays[]>('http://localhost:8000/api/pays');
+    return this.http.get<Pays[]>('http://192.168.1.75:8000/api/pays',this.getHeaders());
   }
 
 
   createUser(user: User): Observable<User> {
-    return this.http.post<User>(this.apiUrl, user);
+    return this.http.post<User>(this.apiUrl, user, this.getHeaders());
   }
 
   updateUser(user: User): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/${user.id}`, user);
+    return this.http.put<User>(`${this.apiUrl}/${user.id}`, user, this.getHeaders());
   }
 
   deleteUser(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`, this.getHeaders());
   }
 }

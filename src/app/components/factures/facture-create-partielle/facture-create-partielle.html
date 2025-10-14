@@ -1,0 +1,171 @@
+<!-- facture-create-partielle.component.html -->
+<div class="container-fluid">
+  <div class="row">
+    <!-- Partie gauche : Liste des éléments du devis -->
+    <div class="col-lg-7">
+      <div class="card border-0">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            Éléments du Devis - Sélection pour Facture Partielle
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Indicateur de chargement -->
+          <div *ngIf="isLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2">Chargement du devis...</p>
+          </div>
+
+          <!-- Liste des éléments -->
+          <div *ngIf="!isLoading && devis" class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-light">
+                <tr>
+                  <th width="50">Sélection</th>
+                  <th>Désignation</th>
+                  <th width="100" class="text-center">Quantité</th>
+                  <th width="120" class="text-end">Prix Unitaire</th>
+                  <th width="120" class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ligne of devis.lignes">
+                  <td class="text-center">
+                    <input type="checkbox" 
+                           class="form-check-input"
+                           [value]="ligne.id"
+                           (change)="onItemSelectionChange(ligne.id, $event)">
+                  </td>
+                  <td>{{ ligne.designation?.libelle }}</td>
+                  <td class="text-center">{{ ligne.quantite }}</td>
+                  <td class="text-end">{{ ligne.prix_unitaire | number:'1.2-2' }} {{ ligne.devise }}</td>
+                  <td class="text-end">{{ ligne.total | number:'1.2-2' }} {{ ligne.devise }}</td>
+                </tr>
+              </tbody>
+              <tfoot *ngIf="devis.lignes.length > 0">
+                <tr class="table-active">
+                  <td colspan="4" class="text-end fw-bold">Total HT:</td>
+                  <td class="text-end fw-bold">{{ devis.total_ht | number:'1.2-2' }} {{ devis.devise }}</td>
+                </tr>
+                <tr class="table-active">
+                  <td colspan="4" class="text-end fw-bold">TVA ({{ devis.tva }}%):</td>
+                  <td class="text-end fw-bold">{{ (devis.total_ttc - devis.total_ht) | number:'1.2-2' }} {{ devis.devise }}</td>
+                </tr>
+                <tr class="table-active">
+                  <td colspan="4" class="text-end fw-bold">Total TTC:</td>
+                  <td class="text-end fw-bold">{{ devis.total_ttc | number:'1.2-2' }} {{ devis.devise }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Message si aucun devis -->
+          <div *ngIf="!isLoading && !devis" class="text-center py-4">
+            <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Aucune Proforma trouvée.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partie droite : Formulaire de création -->
+    <div class="col-lg-5">
+      <div class="card border-0">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-file-invoice-dollar me-2"></i>
+            Informations Facture Partielle
+          </h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()" #factureForm="ngForm">
+
+            <div class="mb-3">
+              <label class="form-label">Libellé de la facture <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="factureData.libelle" name="libelle" required>
+            </div>
+            
+            <!-- Montant TTC calculé -->
+            <div class="mb-3">
+              <label class="form-label">Montant TTC <span class="text-danger">*</span></label>
+              <input type="text" 
+                     class="form-control" 
+                     [value]="totalMontant * (1 + (devis?.tva / 100)) | number:'1.2-2'"
+                     readonly
+                     [class.is-invalid]="selectedItems.length === 0">
+              <div *ngIf="selectedItems.length === 0" class="invalid-feedback">
+                Veuillez sélectionner au moins un élément
+              </div>
+            </div>
+
+            <!-- Remise Spéciale -->
+            <div class="mb-3">
+              <label class="form-label">Remise Spéciale</label>
+              <input type="number" 
+                     class="form-control" 
+                     [(ngModel)]="factureData.remise_speciale"
+                     name="remise_speciale"
+                     step="0.01"
+                     min="0">
+            </div>
+
+            <!-- Numéro BC -->
+            <div class="mb-3">
+              <label class="form-label">Numéro BC <span class="text-danger">*</span></label>
+              <input type="text" 
+                     class="form-control" 
+                     [(ngModel)]="factureData.num_bc"
+                     name="num_bc"
+                     required
+                     placeholder="Numéro BC">
+            </div>
+
+            <!-- Numéro Rap activ -->
+            <div class="mb-3">
+              <label class="form-label">Numéro Rap activ.</label>
+              <input type="text" 
+                     class="form-control" 
+                     [(ngModel)]="factureData.num_rap"
+                     name="num_rap"
+                     placeholder="Numéro RAP">
+            </div>
+
+            <!-- Numéro BL -->
+            <div class="mb-3">
+              <label class="form-label">Numéro BL</label>
+              <input type="text" 
+                     class="form-control" 
+                     [(ngModel)]="factureData.num_bl"
+                     name="num_bl"
+                     placeholder="Numéro BL">
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="d-grid gap-2">
+              <button type="submit" 
+                      class="btn btn-success"
+                      [disabled]="isLoading || selectedItems.length === 0">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                <i class="fas fa-save me-2"></i>
+                {{ isLoading ? 'Création...' : 'Enregistrer' }}
+              </button>
+
+              <button type="button" class="btn btn-warning" (click)="openDevisPdf()">
+                <i class="fas fa-print me-2"></i>
+                Ouvrir la Proforma en PDF
+              </button>
+
+              <a routerLink="/factures" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Retour
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

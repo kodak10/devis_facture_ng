@@ -1,4 +1,4 @@
 ng generate component produits --standalone --skip-tests
 
 ng serve --configuration development --open
-ng serve --configuration development --host 0.0.0.0 --port 4200
+ng serve --configuration development --host 192.168.1.75 --port 4200

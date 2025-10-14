@@ -37,6 +37,8 @@
               "src/assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css",
               "src/assets/css/preloader.min.css",
               "src/assets/css/bootstrap.min.css",
+              "node_modules/ngx-toastr/toastr.css",
+
               "src/assets/css/icons.min.css",
               "src/assets/css/app.min.css"
             ],
