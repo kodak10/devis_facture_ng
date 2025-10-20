@@ -1,0 +1,193 @@
+<!-- Étape 1 : Saisie -->
+<div *ngIf="!isLoading && step === 1">
+  <div class="row">
+    <div class="col-lg-4">
+      <label class="form-label">Nom & Prénom <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" [(ngModel)]="nom_prenom" (change)="errors.nom_prenom = ''">
+      <div class="invalid-feedback" *ngIf="errors.nom_prenom">
+        {{ errors.nom_prenom }}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <label class="form-label">Date d’émission <span class="text-danger">*</span></label>
+      <input type="date" class="form-control" [class.is-invalid]="errors.date"
+             [(ngModel)]="date" (change)="errors.date = ''">
+      <div class="invalid-feedback" *ngIf="errors.date">
+        {{ errors.date }}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <label class="form-label">Lieu <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" [(ngModel)]="lieu" (change)="errors.lieu = ''">
+      <div class="invalid-feedback" *ngIf="errors.lieu">
+        {{ errors.lieu }}
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-lg-3">
+      <label class="form-label">Date de depart</label>
+      <input type="date" class="form-control" [class.is-invalid]="errors.debut"
+             [(ngModel)]="debut" (change)="errors.debut = ''">
+      <div class="invalid-feedback" *ngIf="errors.debut">
+        {{ errors.debut }}
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <label class="form-label">Date fin</label>
+      <input type="date" class="form-control" [class.is-invalid]="errors.fin"
+             [(ngModel)]="fin" (change)="errors.fin = ''">
+      <div class="invalid-feedback" *ngIf="errors.fin">
+        {{ errors.fin }}
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h5>Conditions financières</h5>
+  <div class="row">
+    <div class="row mt-3">
+      <div class="col-lg-3">
+        <label class="form-label">Motif</label>
+        <input type="text" class="form-control" [(ngModel)]="motif" name="motif" />
+      </div>
+
+      <div class="col-lg-3">
+        <label class="form-label">Montant demandé (en chiffres)</label>
+        <input type="text" class="form-control" [(ngModel)]="montant_en_chiffre" name="montant_en_chiffre" />
+      </div>
+
+      <div class="col-lg-3">
+        <label class="form-label">(en lettres)</label>
+        <input type="text" class="form-control" [(ngModel)]="montant_en_lettre" name="montant_en_lettre" />
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-lg-3">
+          <label class="form-label">Billet d’avion</label>
+          <input type="number" class="form-control" [(ngModel)]="billet_avion" name="billet_avion"
+                (input)="updateTotal()" placeholder="0">
+        </div>
+
+        <div class="col-lg-3">
+          <label class="form-label">Chèque de voyage</label>
+          <input type="number" class="form-control" [(ngModel)]="cheque" name="cheque"
+                (input)="updateTotal()" placeholder="0">
+        </div>
+
+        <div class="col-lg-3">
+          <label class="form-label">Hébergement & Repas</label>
+          <input type="number" class="form-control" [(ngModel)]="hebergement_repars" name="hebergement_repars"
+                (input)="updateTotal()" placeholder="0">
+        </div>
+
+        <div class="col-lg-3">
+          <label class="form-label">Espèces</label>
+          <input type="number" class="form-control" [(ngModel)]="especes" name="especes"
+                (input)="updateTotal()" placeholder="0">
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-lg-3">
+          <label class="form-label fw-bold">Total</label>
+          <input type="text" class="form-control fw-bold bg-light" [(ngModel)]="totale" name="totale" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="d-flex justify-content-between mt-3">
+    <button class="btn btn-secondary" (click)="cancel()">
+      <i class="fas fa-times"></i> Annuler
+    </button>
+    <button class="btn btn-success" (click)="nextStep()">
+      <i class="fas fa-arrow-right"></i> Suivant
+    </button>
+  </div>
+</div>
+
+<!-- Étape 2 : Aperçu et Enregistrement -->
+<div *ngIf="!isLoading && step === 2">
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    Vérifiez les informations ci-dessous avant d'enregistrer le Travel request.
+  </div>
+
+  <h5 class="mb-4">Aperçu du Travel Request #{{ travels.id }}</h5>
+
+  <!-- Informations générales -->
+  <div class="row mb-4">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations générales</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-6">
+              <p><strong>Nom & Prénom:</strong><br>{{ nom_prenom }}</p>
+              <p><strong>Date d’émission:</strong><br>{{ date | date:'dd/MM/yyyy' }}</p>
+              <p><strong>Lieu:</strong><br>{{ lieu }}</p>
+            </div>
+            <div class="col-lg-6">
+              <p><strong>Date de départ:</strong><br>{{ debut | date:'dd/MM/yyyy' }}</p>
+              <p><strong>Date fin:</strong><br>{{ fin | date:'dd/MM/yyyy' }}</p>
+              <p><strong>Motif:</strong><br>{{ motif }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h6 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Conditions financières</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-6">
+              <p><strong>Montant demandé (en chiffres):</strong><br>{{ montant_en_chiffre }}</p>
+              <p><strong>(en lettres):</strong><br>{{ montant_en_lettre }}</p>
+              <p><strong>Billet d’avion:</strong><br>{{ billet_avion }} jours</p>
+            </div>
+            <div class="col-lg-6">
+              <p><strong>Chèque de voyage:</strong><br>{{ cheque }}</p>
+              <p><strong>Hébergement & Repas:</strong><br>{{ hebergement_repars }}</p>
+              <p><strong>Espèces:</strong><br>{{ especes }} jours</p>
+              <p><strong>Total:</strong><br>{{ totale }} jours</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boutons d'actions -->
+  <div class="d-flex justify-content-between mt-4">
+    <button class="btn btn-secondary" (click)="previousStep()">
+      <i class="fas fa-arrow-left me-2"></i> Retour à la saisie
+    </button>
+
+    <div>
+      <button class="btn btn-outline-secondary me-2" (click)="cancel()">
+        <i class="fas fa-times me-2"></i> Annuler
+      </button>
+      <button class="btn btn-success" (click)="saveTravels()">
+        <i class="fas fa-save me-2"></i> Mettre à jour le Tavel request
+      </button>
+    </div>
+  </div>
+
+  <!-- Message de statut -->
+  <div *ngIf="travels.status" class="alert alert-warning mt-3">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Statut actuel:</strong> {{ travels.status }}
+    <span *ngIf="travels.status === 'Validé'" class="badge bg-success ms-2">Validé</span>
+    <span *ngIf="travels.status === 'Réfusé'" class="badge bg-danger ms-2">Refusé</span>
+    <span *ngIf="travels.status === 'En Attente de validation'" class="badge bg-warning ms-2">En attente</span>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+.steps-indicator {
+  .step-item {
+    text-align: center;
+    position: relative;
+    
+    .step-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      border: 3px solid #e9ecef;
+      transition: all 0.3s ease;
+      
+      i {
+        font-size: 1.5rem;
+        color: #6c757d;
+      }
+    }
+    
+    .step-label {
+      font-weight: 500;
+      color: #6c757d;
+    }
+    
+    &.active {
+      .step-icon {
+        border-color: #007bff;
+        background: #007bff;
+        
+        i {
+          color: white;
+        }
+      }
+      
+      .step-label {
+        color: #007bff;
+        font-weight: 600;
+      }
+    }
+    
+    &.completed {
+      .step-icon {
+        border-color: #28a745;
+        background: #28a745;
+        
+        i {
+          color: white;
+        }
+      }
+      
+      .step-label {
+        color: #28a745;
+      }
+    }
+  }
+  
+  .step-connector {
+    flex: 1;
+    height: 3px;
+    background: #e9ecef;
+    margin: 30px 10px;
+    position: relative;
+    top: -15px;
+    
+    &.completed {
+      background: #28a745;
+    }
+  }
+}
+
+// Styles pour les messages d'erreur
+.invalid-feedback {
+  display: block;
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+  border-color: #dc3545;
+}
+
+// Styles pour les cartes
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  
+  .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .steps-indicator {
+    .step-item {
+      .step-icon {
+        width: 40px;
+        height: 40px;
+        
+        i {
+          font-size: 1rem;
+        }
+      }
+    }
+    
+    .step-connector {
+      margin: 20px 5px;
+      top: -10px;
+    }
+  }
+}
