@@ -1,6 +1,6 @@
 // services/devis.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface DevisLigne {
@@ -60,22 +60,35 @@ export class TravelsService {
   private apiUrl = 'http://127.0.0.1:8000/api/travel';
   // private apiUrl = 'http://192.168.1.13:8000/api/devis';
 
+  private getHeaders(): { headers: HttpHeaders } {
+      const token = localStorage.getItem('token');
+      return {
+        headers: new HttpHeaders({
+          Authorization: token ? `Bearer ${token}` : ''
+        })
+      };
+    }
+
   constructor(private http: HttpClient) {}
 
   getTravels(): Observable<Travels[]> {
-    return this.http.get<Travels[]>(this.apiUrl);
+    return this.http.get<Travels[]>(this.apiUrl, this.getHeaders());
   }
 
   createTravels(travel: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, travel);
+    return this.http.post<any>(this.apiUrl, travel, this.getHeaders());
   }
 
   getTravelsById(id: number): Observable<Travels> {
-    return this.http.get<Travels>(`${this.apiUrl}/${id}`);
+    return this.http.get<Travels>(`${this.apiUrl}/${id}`, this.getHeaders());
   }
 
   updateTravels(travel: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${travel.id}`, travel);
+    return this.http.put<any>(`${this.apiUrl}/${travel.id}`, travel, this.getHeaders());
+  }
+
+  updateStatut(id: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/send-travel`, {}, this.getHeaders());
   }
 
 getPdfUrl(travelId: number): void {
@@ -84,6 +97,6 @@ getPdfUrl(travelId: number): void {
 }
 
   deleteTravels(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`, this.getHeaders());
   }
 }

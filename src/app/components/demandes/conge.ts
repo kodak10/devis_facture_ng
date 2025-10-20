@@ -14,7 +14,7 @@ declare var $: any;
   styleUrls: ['./conge.scss']
 })
 export class CongerComponent implements OnInit {
-  conges: Congers[] = [];
+  conges: any[] = [];
   selectedConger: Congers = {} as Congers;
   formConger: Congers = {} as Congers;
   dateRepriseMessage: string = '';
@@ -179,6 +179,21 @@ export class CongerComponent implements OnInit {
   });
 }
 
+  loadConges() {
+    this.congerService.getCongers().subscribe((data: any) => {
+      this.conges = data;
+    });
+  }
+
+  updateStatut(congesId: number, statut: number) {
+    this.congerService.updateStatutCongers(congesId, statut).subscribe(() => {
+      this.loadConges();
+    });
+  }
+
+  hasPendingRequests(): boolean {
+    return this.conges?.some(c => c.statut === 0);
+  }
 
   deleteConger(id?: number) {
     if (!id) return;

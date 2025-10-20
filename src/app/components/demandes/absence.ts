@@ -14,7 +14,7 @@ declare var $: any;
   styleUrls: ['./absence.scss']
 })
 export class AbsenceComponent implements OnInit {
-  absences: Absence[] = [];
+  absences: any[] = [];
   selectedAbsence: Absence = {} as Absence;
   formAbsence: Absence = {} as Absence;
   errors: any = {};
@@ -76,6 +76,21 @@ export class AbsenceComponent implements OnInit {
   });
 }
 
+  loadAbscence() {
+    this.absenceService.getAbsences().subscribe((data: any) => {
+      this.absences = data;
+    });
+  }
+
+  updateStatut(AbsenceId: number, statut: number) {
+    this.absenceService.updateStatutAbsences(AbsenceId, statut).subscribe(() => {
+      this.loadAbscence();
+    });
+  }
+
+  hasPendingRequests(): boolean {
+    return this.absences?.some(a => a.statut === 0);
+  }
 
   deleteAbsence(id?: number) {
     if (!id) return;

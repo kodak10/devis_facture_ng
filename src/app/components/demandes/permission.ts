@@ -14,7 +14,7 @@ declare var $: any;
   styleUrls: ['./permission.scss']
 })
 export class PermissionsComponent implements OnInit {
-  permissions: Permissions[] = [];
+  permissions: any[] = [];
   selectedPermission: Permissions = {} as Permissions;
   formPermission: Permissions = {} as Permissions;
   dateRepriseMessage: string = '';
@@ -178,6 +178,22 @@ export class PermissionsComponent implements OnInit {
     }
   });
 }
+
+  loadPermissions() {
+    this.permissionsService.getPermissions().subscribe((data: any) => {
+      this.permissions = data;
+    });
+  }
+
+  updateStatut(permissionId: number, statut: number) {
+    this.permissionsService.updateStatutPermissions(permissionId, statut).subscribe(() => {
+      this.loadPermissions();
+    });
+  }
+
+  hasPendingRequests(): boolean {
+    return this.permissions?.some(p => p.statut === 0);
+  }
 
 
   deletePermission(id?: number) {

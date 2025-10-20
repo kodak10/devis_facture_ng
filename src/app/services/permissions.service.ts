@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Permissions {
@@ -28,19 +28,32 @@ export class permissionsService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
   getPermissions(page: number = 1): Observable<any> {
-    return this.http.get(`${this.apiUrl}/permission?page=${page}`);
+    return this.http.get(`${this.apiUrl}/permission?page=${page}`, this.getHeaders());
   }
 
   createPermissions(permissions: Permissions): Observable<Permissions> {
-    return this.http.post<Permissions>(`${this.apiUrl}/storepermission`, permissions);
+    return this.http.post<Permissions>(`${this.apiUrl}/storepermission`, permissions, this.getHeaders());
   }
 
   updatePermissions(permissions: Permissions): Observable<Permissions> {
-    return this.http.patch<Permissions>(`${this.apiUrl}/updates/permission/${permissions.id}`, permissions);
+    return this.http.put<Permissions>(`${this.apiUrl}/updates/permission/${permissions.id}`, permissions, this.getHeaders());
+  }
+
+  updateStatutPermissions(id: number, statut: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/statut`, { statut }, this.getHeaders());
   }
 
   deletePermissions(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/deletes/permission/${id}`);
+    return this.http.delete(`${this.apiUrl}/deletes/permission/${id}`, this.getHeaders());
   }
 }

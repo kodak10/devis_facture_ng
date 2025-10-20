@@ -35,19 +35,24 @@
             <td>{{ d.debut | date:'dd-MM-yyyy' }}</td>
             <!-- <td>{{ d.montant_en_chiffre | number:'1.2-2'  }}</td> -->
             <td class="text-end">{{ d.totale | number:'1.2-2' }}</td>
-            <td>{{ d.status }}</td>
+            <td class="text-center">{{ d.status }}</td>
             <td>
               <div class="btn-group">
-                <button class="btn btn-warning btn-sm me-1"
-                      [routerLink]="['/travel/edit', d.id]"
-                      title="Modifier le travel request">
-                <i class="fas fa-edit"></i>
-              </button>
                 <button class="btn btn-warning btn-sm me-1"
                         (click)="getPdfUrl(d.id)"
                         title="Ouvrir le PDF">
                   <i class="fas fa-file-pdf"></i>
                 </button>
+                <button class="btn btn-warning btn-sm me-1"
+                      [routerLink]="['/travel/edit', d.id]"
+                      title="Modifier le travel request">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-success btn-sm me-1"
+                        (click)="updateStatut(d.id)"
+                        title="Valider la travel request">
+                    <i class="fas fa-check-circle"></i>
+                  </button>
                 <button class="btn btn-danger btn-sm" (click)="deleteTravels(d.id)">
                   <i class="fas fa-trash"></i>
                 </button>

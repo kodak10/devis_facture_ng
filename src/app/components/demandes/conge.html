@@ -18,12 +18,13 @@
           <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
             <thead>
               <tr>
-                <th>Type de Conge*</th>
-                <th>Motif*</th>
-                <th>Date de départ*</th>
-                <th>Date de fin*</th>
-                <th>Document*</th>
-                <th>Actions</th>
+                <th>Type de Conge</th>
+                <th>Motif</th>
+                <th>Date de départ</th>
+                <th>Date de fin</th>
+                <th>Document</th>
+                <th>Statut</th>
+                <th class="text-center" *ngIf="hasPendingRequests()">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -38,9 +39,20 @@
                     {{ conger.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
                   </a>
                 </td>
-                <td>
-                  <button class="btn btn-sm btn-warning me-2" (click)="openModal(congerModal, conger)">Modifier</button>
-                  <button class="btn btn-sm btn-danger" (click)="deleteConger(conger.id)">Supprimer</button>
+                <td class="text-center">
+                  <span [ngClass]="{
+                    'badge bg-warning': conger.statut === 0,
+                    'badge bg-success': conger.statut === 1,
+                    'badge bg-danger': conger.statut === 2
+                    }">
+                    {{ conger.statut === 0 ? 'En attente' : conger.statut === 1 ? 'Validée' : 'Refusée' }}
+                  </span>
+                </td>
+                <td class="text-center" *ngIf="hasPendingRequests()">
+                  <ng-container *ngIf="conger.statut === 0">
+                    <button class="btn btn-sm btn-warning me-2" (click)="openModal(congerModal, conger)">Modifier</button>
+                    <button class="btn btn-sm btn-danger" (click)="deleteConger(conger.id)">Supprimer</button>
+                  </ng-container>
                 </td>
               </tr>
             </tbody>

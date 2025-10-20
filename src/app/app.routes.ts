@@ -197,6 +197,13 @@ export const routes: Routes = [
     },
 
     {
+      path: 'travel/suivi',
+      loadChildren: () =>
+        import('./components/travel_request/suivi/suivi.routes').then(m => m.TRAVELS_SUIVI_ROUTES),
+      canActivate: [AuthGuard]
+    },
+
+    {
         path: 'absences',
         loadChildren: () => import('./components/demandes/absence.routes').then(m => m.ABSENCE_ROUTES),
         canActivate: [AuthGuard]
@@ -204,6 +211,11 @@ export const routes: Routes = [
     {
         path: 'materiels',
         loadChildren: () => import('./components/demandes/bien-et-service.routes').then(m => m.BIEN_ET_SERVICE_ROUTES),
+        canActivate: [AuthGuard]
+    },
+    {
+        path: 'analysedemandes',
+        loadChildren: () => import('./components/demandes/analysedemande/liste.routes').then(m => m.LISTE_ROUTES),
         canActivate: [AuthGuard]
     },
     {

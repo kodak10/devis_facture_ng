@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Absence {
@@ -28,19 +28,32 @@ export class AbsenceService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
   getAbsences(page: number = 1): Observable<any> {
-    return this.http.get(`${this.apiUrl}/absence?page=${page}`);
+    return this.http.get(`${this.apiUrl}/absence?page=${page}`, this.getHeaders());
   }
 
   createAbsences(absence: Absence): Observable<Absence> {
-    return this.http.post<Absence>(`${this.apiUrl}/storeabsence`, absence);
+    return this.http.post<Absence>(`${this.apiUrl}/storeabsence`, absence, this.getHeaders());
   }
 
   updateAbsences(absence: Absence): Observable<Absence> {
-    return this.http.patch<Absence>(`${this.apiUrl}/updates/${absence.id}`, absence);
+    return this.http.put<Absence>(`${this.apiUrl}/updates/${absence.id}`, absence, this.getHeaders());
+  }
+
+  updateStatutAbsences(id: number, statut: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/statut`, { statut }, this.getHeaders());
   }
 
   deleteAbsences(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/deletes/${id}`);
+    return this.http.delete(`${this.apiUrl}/deletes/${id}`, this.getHeaders());
   }
 }

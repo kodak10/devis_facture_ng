@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Demande {
@@ -30,20 +30,33 @@ export class DemandeService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
   getDemandes(page: number = 1): Observable<any> {
-    return this.http.get(`${this.apiUrl}?page=${page}`);
+    return this.http.get(`${this.apiUrl}?page=${page}`, this.getHeaders());
   }
 
   createDemandes(demande: Demande): Observable<Demande> {
-    return this.http.post<Demande>(`${this.apiUrl}/store`, demande);
+    return this.http.post<Demande>(`${this.apiUrl}/store`, demande, this.getHeaders());
   }
 
   updateDemandes(demande: Demande): Observable<Demande> {
-    return this.http.patch<Demande>(`${this.apiUrl}/update/${demande.id}`, demande);
+    return this.http.put<Demande>(`${this.apiUrl}/update/${demande.id}`, demande, this.getHeaders());
+  }
+
+  updateStatutDemandes(id: number, statut: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/statut`, { statut }, this.getHeaders());
   }
 
   deleteDemandes(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete(`${this.apiUrl}/delete/${id}`, this.getHeaders());
   }
 }
 

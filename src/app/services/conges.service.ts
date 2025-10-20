@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Congers {
@@ -28,19 +28,32 @@ export class CongerService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : ''
+      })
+    };
+  }
+
   getCongers(page: number = 1): Observable<any> {
-    return this.http.get(`${this.apiUrl}/conger?page=${page}`);
+    return this.http.get(`${this.apiUrl}/conger?page=${page}`, this.getHeaders());
   }
 
   createCongers(conger: Congers): Observable<Congers> {
-    return this.http.post<Congers>(`${this.apiUrl}/storeconger`, conger);
+    return this.http.post<Congers>(`${this.apiUrl}/storeconger`, conger, this.getHeaders());
   }
 
   updateCongers(conger: Congers): Observable<Congers> {
-    return this.http.patch<Congers>(`${this.apiUrl}/update/conger/${conger.id}`, conger);
+    return this.http.put<Congers>(`${this.apiUrl}/update/conger/${conger.id}`, conger, this.getHeaders());
+  }
+
+  updateStatutCongers(id: number, statut: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/statut`, { statut }, this.getHeaders());
   }
 
   deleteCongers(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/delete/conger/${id}`);
+    return this.http.delete(`${this.apiUrl}/delete/conger/${id}`, this.getHeaders());
   }
 }

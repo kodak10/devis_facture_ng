@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
-  private api = 'http://192.168.1.75:8000/api'; // adapte
+  private api = 'http://localhost:8000/api';
+  // private api = 'http://192.168.1.75:8000/api'; // adapte
 
   constructor(private http: HttpClient) {}
 

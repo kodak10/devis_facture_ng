@@ -32,6 +32,9 @@ export class UtilisateursComponent implements OnInit {
 
   rolesSelect2Instance: any = null;
   paysSelect2Instance: any = null;
+  showToast!: boolean;
+  toastType!: string;
+  toastMessage!: string;
 
   constructor(private utilisateurService: UtilisateurService, private modalService: NgbModal, private toastr: ToastrService) {}
 
@@ -41,7 +44,6 @@ export class UtilisateursComponent implements OnInit {
     this.loadPays();
   }
 
-<<<<<<< HEAD
   showNotification(message: string, type: 'success' | 'error' = 'success') {
     this.toastMessage = message;
     this.toastType = type;
@@ -52,9 +54,6 @@ export class UtilisateursComponent implements OnInit {
       this.showToast = false;
     }, 5000);
   }
-=======
-  
->>>>>>> 14b31ab3f47908ea168ef56ef12479dd2df1faf5
 
   loadRoles() {
     this.utilisateurService.getRoles().subscribe(res => {
@@ -196,7 +195,6 @@ export class UtilisateursComponent implements OnInit {
 
     request.subscribe({
       next: (res) => {
-<<<<<<< HEAD
         console.log(this.selectedUser.id ? 'Update réussi :' : 'Création réussie :', res);
         this.modalService.dismissAll();
         this.loadUsers();
@@ -206,10 +204,7 @@ export class UtilisateursComponent implements OnInit {
             : 'Utilisateur créé avec succès',
           'success'
         );
-=======
         this.toastr.success('Enregistré avec succès', 'Succès');
-        
->>>>>>> 14b31ab3f47908ea168ef56ef12479dd2df1faf5
       },
       error: (err : any) => {
         console.error(err);

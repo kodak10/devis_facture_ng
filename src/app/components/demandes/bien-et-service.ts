@@ -14,7 +14,10 @@ declare var $: any;
   styleUrls: ['./bien-et-service.scss']
 })
 export class Bien_et_ServiceComponent implements OnInit {
-  demandes: Demande[] = [];
+Number(arg0: string|undefined) {
+throw new Error('Method not implemented.');
+}
+  demandes: any[] = [];
   selectedDemande: Demande = {} as Demande;
   formDemande: Demande = {} as Demande;
   errors: any = {};
@@ -23,6 +26,7 @@ export class Bien_et_ServiceComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadClients();
+    this.loadDemandes();
   }
 
   loadClients() {
@@ -53,29 +57,46 @@ export class Bien_et_ServiceComponent implements OnInit {
   }
 
   saveDemande(formData: any) {
-  const payload = { ...this.selectedDemande, ...formData };
+    const payload = { ...this.selectedDemande, ...formData };
 
-  const request = this.selectedDemande.id
-    ? this.demandeService.updateDemandes(payload)
-    : this.demandeService.createDemandes(payload);
+    const request = this.selectedDemande.id
+      ? this.demandeService.updateDemandes(payload)
+      : this.demandeService.createDemandes(payload);
 
-  request.subscribe({
-    next: () => {
-      // Fermer la modal
-      this.modalService.dismissAll();
+    request.subscribe({
+      next: () => {
+        // Fermer la modal
+        this.modalService.dismissAll();
 
-      // Recharger la liste
-      this.loadClients();
+        // Recharger la liste
+        this.loadClients();
 
-      // Réinitialiser les erreurs
-      this.errors = {};
-    },
-    error: (err) => {
-      this.errors = err.error.errors;
-    }
-  });
-}
+        // Réinitialiser les erreurs
+        this.errors = {};
+      },
+      error: (err) => {
+        this.errors = err.error.errors;
+      }
+    });
+  }
 
+
+
+  loadDemandes() {
+    this.demandeService.getDemandes().subscribe((data: any) => {
+      this.demandes = data;
+    });
+  }
+
+  updateStatut(demandeId: number, statut: number) {
+    this.demandeService.updateStatutDemandes(demandeId, statut).subscribe(() => {
+      this.loadDemandes();
+    });
+  }
+
+  hasPendingRequests(): boolean {
+    return this.demandes?.some(d => d.statut === 0);
+  }
 
   deleteDemande(id?: number) {
     if (!id) return;

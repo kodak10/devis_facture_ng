@@ -52,28 +52,43 @@
             <li><a routerLink="/comptabilite/report"><i data-feather="pie-chart"></i> Report Financier</a></li>
           </ul>
         </li>
-                            <li>
-                                <a href="javascript: void(0);" class="has-arrow">
-                                    <i data-feather="users"></i>
-                                    <span data-key="t-authentication">Missions</span>
-                                </a>
-                                <ul class="sub-menu" aria-expanded="false">
-                                    <li><a routerLink="/travel/create" data-key="t-login">Créer</a></li>
-                                    <li><a routerLink="/travel" data-key="t-register">Liste</a></li>
-                                    <li><a href="auth-recoverpw.html" data-key="t-recover-password">Suivi</a></li>
-                                </ul>
-                            </li>
 
-                            <li>
-                                <a href="javascript: void(0);" class="has-arrow">
-                                    <i data-feather="file-text"></i>
-                                    <span data-key="t-pages">Comptabilité & Report</span>
-                                </a>
-                                <ul class="sub-menu" aria-expanded="false">
-                                    <li><a href="pages-starter.html" data-key="t-starter-page">Journal Comptabilité</a></li>
-                                    <li><a href="pages-maintenance.html" data-key="t-maintenance">Report Financier</a></li>
-                                </ul>
-                            </li>
+        <li>
+            <a href="javascript: void(0);" class="has-arrow">
+                <i data-feather="users"></i>
+                <span data-key="t-authentication">Missions</span>
+            </a>
+            <ul class="sub-menu" aria-expanded="false">
+                <li routerLinkActive="active"><a routerLink="/travel/create"><i data-feather="plus-circle"></i> Créer</a></li>
+                <li routerLinkActive="active"><a routerLink="/travel"><i data-feather="list"></i> Liste</a></li>
+                <li routerLinkActive="active"><a routerLink="travel/suivi"><i data-feather="activity"></i> Suivi</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <a href="javascript: void(0);" class="has-arrow">
+                <i data-feather="layers"></i>
+                <span data-key="t-authentication">Faire une Demande</span>
+            </a>
+            <ul class="sub-menu" aria-expanded="false">
+                <li routerLinkActive="active"><a routerLink="/materiels"><i data-feather="package"></i>Demande de bien et service</a></li>
+                <li routerLinkActive="active"><a routerLink="/permissions"><i data-feather="key"></i>Demande de Permissions</a></li>
+                <li routerLinkActive="active"><a routerLink="/absences"><i data-feather="clock"></i>Demande d'absence</a></li>
+                <li routerLinkActive="active"><a routerLink="/congers"><i data-feather="umbrella"></i>Demande de Congés</a></li>
+                <li routerLinkActive="active"><a routerLink="/analysedemandes"><i data-feather="bar-chart-2"></i>Analyse des Demandes</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <a href="javascript: void(0);" class="has-arrow">
+                <i data-feather="file-text"></i>
+                <span data-key="t-pages">Comptabilité & Report</span>
+            </a>
+            <ul class="sub-menu" aria-expanded="false">
+                <li><a href="pages-starter.html" data-key="t-starter-page">Journal Comptabilité</a></li>
+                <li><a href="pages-maintenance.html" data-key="t-maintenance">Report Financier</a></li>
+            </ul>
+        </li>
         <!-- PARAMÈTRAGE -->
         <li class="menu-title mt-2" data-key="t-components">Paramétrage</li>
 
@@ -104,52 +119,29 @@
             <span>Utilisateurs</span>
           </a>
         </li>
-                            <li>
-                                <a routerLink="/absences">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Demande d'absence</span>
-                                </a>
-                            </li>
 
-                            <li>
-                                <a routerLink="/materiels">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Demande de bien et service</span>
-                                </a>
-                            </li>
+        <li>
+            <a routerLink="/utilisateurs">
+                <i data-feather="layout"></i>
+                <span data-key="t-horizontal">Utilisateurs</span>
+            </a>
+        </li>
 
-                            <li>
-                                <a routerLink="/congers">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Demande de Conges</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a routerLink="/permissions">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Demande de Permissions</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a routerLink="/utilisateurs">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-horizontal">Utilisateurs</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a routerLink="/configuration-generale">
-                                    <i data-feather="layout"></i>
-                                    <span data-key="t-settings">Configuration Générale</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- Sidebar -->
-                </div>
-            </div>
+        <li>
+            <a routerLink="/configuration-generale">
+                <i data-feather="layout"></i>
+                <span data-key="t-settings">Configuration Générale</span>
+            </a>
+        </li>
+    </ul>
+  </div>
+  <!-- Sidebar -->
+</div>
+</div>
+<div>
+  <div>
+    <div>
+      <ul>
             <!-- Left Sidebar End -->
         <li routerLinkActive="active">
           <a routerLink="/configuration-generale">

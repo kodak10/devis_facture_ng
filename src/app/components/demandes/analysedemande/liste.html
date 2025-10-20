@@ -1,0 +1,225 @@
+<div class="container-fluid">
+
+  <h4 class="mb-3">Liste des demandes</h4>
+
+  <div class="accordion" id="demandesAccordion">
+
+    <!-- Bien et service -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingBien">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBien" aria-expanded="true" aria-controls="collapseBien">
+          Bien et Service
+        </button>
+      </h2>
+      <div id="collapseBien" class="accordion-collapse collapse show" aria-labelledby="headingBien" data-bs-parent="#demandesAccordion">
+        <div class="accordion-body">
+          <table id="datatableDemande" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Motif</th>
+                <th>Montant</th>
+                <th>Documents</th>
+                <th>Statut</th>
+                <th class="text-center" *ngIf="hasPendingRequestsdemande()">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let demande of demandes">
+                <td>{{ demande.motif_permi }}</td>
+                <td>{{ demande.motif }}</td>
+                <td>{{ demande.montant_demande }}</td>
+                <td class="text-center">
+                  <a [href]="demande.document_justificatif" target="_blank" class="text-decoration-none">
+                    📑 {{ demande.document_justificatif | slice:-15 }}
+                  </a>
+                </td>
+                <td>
+                  <span [ngClass]="{
+                    'badge bg-warning': (demande.statut) === 0,
+                    'badge bg-success': demande.statut === 1,
+                    'badge bg-danger': demande.statut === 2
+                  }">
+                  {{ demande.statut === 0 ? 'En attente' : demande.statut === 1 ? 'Validée' : 'Refusée' }}
+                  </span>
+                </td>
+                <td class="text-center" *ngIf="hasPendingRequestsdemande()">
+                  <ng-container *ngIf="demande.statut === 0">
+                    <button class="btn btn-success btn-sm me-2" (click)="updateStatutdemande(demande.id, 1)">Valider</button>
+                    <button class="btn btn-danger btn-sm" (click)="updateStatutdemande(demande.id, 2)">Refuser</button>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Absences -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingAbsence">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAbsence" aria-expanded="false" aria-controls="collapseAbsence">
+          Absences
+        </button>
+      </h2>
+      <div id="collapseAbsence" class="accordion-collapse collapse" aria-labelledby="headingAbsence" data-bs-parent="#demandesAccordion">
+        <div class="accordion-body">
+          <table id="datatableAbsence" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Raison de l'absence</th>
+                <th>Motif</th>
+                <th>Date début</th>
+                <th>Date fin</th>
+                <th>Document</th>
+                <th>Statut</th>
+                <th class="text-center" *ngIf="hasPendingRequestsabcence()">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let absence of absences">
+                <td>{{ absence.motif }}</td>
+                <td>{{ absence.motif_permi }}</td>
+                <td>{{ absence.date_depart }}</td>
+                <td>{{ absence.date_fin }}</td>
+                <td class="text-center">
+                  <a [href]="absence.document_justificatif" target="_blank" class="text-decoration-none">
+                    <i class="material-icons" style="color: #ffc107;">📑</i>
+                    {{ absence.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
+                  </a>
+                </td>
+                <td>
+                  <span [ngClass]="{
+                    'badge bg-warning': absence.statut === 0,
+                    'badge bg-success': absence.statut === 1,
+                    'badge bg-danger': absence.statut === 2
+                  }">
+                  {{ absence.statut === 0 ? 'En attente' : absence.statut === 1 ? 'Validée' : 'Refusée' }}
+                  </span>
+                </td>
+                <td class="text-center" *ngIf="hasPendingRequestsabcence()">
+                  <ng-container *ngIf="absence.statut === 0">
+                    <button class="btn btn-success btn-sm me-2" (click)="updateStatutabsence(absence.id, 1)">Valider</button>
+                    <button class="btn btn-danger btn-sm me-2" (click)="updateStatutabsence(absence.id, 2)">Refuser</button>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Congés -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingConges">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConges" aria-expanded="false" aria-controls="collapseConges">
+          Congés
+        </button>
+      </h2>
+      <div id="collapseConges" class="accordion-collapse collapse" aria-labelledby="headingConges" data-bs-parent="#demandesAccordion">
+        <div class="accordion-body">
+          <table id="datatableConges" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Type de Conge</th>
+                <th>Motif</th>
+                <th>Date départ</th>
+                <th>Date fin</th>
+                <th>Document</th>
+                <th>Statut</th>
+                <th class="text-center" *ngIf="hasPendingRequestsconges()">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let conger of conges">
+                <td>{{ conger.motif }}</td>
+                <td>{{ conger.motif_permi }}</td>
+                <td>{{ conger.date_depart }}</td>
+                <td>{{ conger.date_fin }}</td>
+                <td class="text-center">
+                  <a [href]="conger.document_justificatif" target="_blank" class="text-decoration-none">
+                    <i class="material-icons" style="color: #ffc107;">📑</i>
+                    {{ conger.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
+                  </a>
+                </td>
+                <td>
+                  <span [ngClass]="{
+                    'badge bg-warning': conger.statut === 0,
+                    'badge bg-success': conger.statut === 1,
+                    'badge bg-danger': conger.statut === 2
+                  }">
+                  {{ conger.statut === 0 ? 'En attente' : conger.statut === 1 ? 'Validée' : 'Refusée' }}
+                  </span>
+                </td>
+                <td class="text-center" *ngIf="hasPendingRequestsconges()">
+                  <ng-container *ngIf="conger.statut === 0">
+                    <button class="btn btn-success btn-sm me-2" (click)="updateStatutconges(conger.id, 1)">Valider</button>
+                    <button class="btn btn-danger btn-sm me-2" (click)="updateStatutconges(conger.id, 2)">Refuser</button>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Permissions -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingPermissions">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePermissions" aria-expanded="false" aria-controls="collapsePermissions">
+          Permissions
+        </button>
+      </h2>
+      <div id="collapsePermissions" class="accordion-collapse collapse" aria-labelledby="headingPermissions" data-bs-parent="#demandesAccordion">
+        <div class="accordion-body">
+          <table id="datatablePermissions" class="table table-bordered dt-responsive nowrap w-100">
+            <thead>
+              <tr>
+                <th>Type de Permissions*</th>
+                <th>Motif*</th>
+                <th>Date départ</th>
+                <th>Date fin</th>
+                <th>Document*</th>
+                <th>Statut</th>
+                <th class="text-center" *ngIf="hasPendingRequestspermission()">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let permission of permissions">
+                <td>{{ permission.motif }}</td>
+                <td>{{ permission.motif_permi }}</td>
+                <td>{{ permission.date_depart }}</td>
+                <td>{{ permission.date_fin }}</td>
+                <td class="text-center">
+                  <a [href]="permission.document_justificatif" target="_blank" class="text-decoration-none">
+                    <i class="material-icons" style="color: #ffc107;">📑</i>
+                    {{ permission.document_justificatif | slice:-15 }} <!-- affiche la fin du nom du fichier -->
+                  </a>
+                </td>
+                <td>
+                  <span [ngClass]="{
+                    'badge bg-warning': permission.statut === 0,
+                    'badge bg-success': permission.statut === 1,
+                    'badge bg-danger': permission.statut === 2
+                  }">
+                  {{ permission.statut === 0 ? 'En attente' : permission.statut === 1 ? 'Validée' : 'Refusée' }}
+                  </span>
+                </td>
+                <td class="text-center" *ngIf="hasPendingRequestspermission()">
+                  <ng-container *ngIf="permission.statut === 0">
+                    <button class="btn btn-success btn-sm me-2" (click)="updateStatutpermission(permission.id, 1)">Valider</button>
+                    <button class="btn btn-danger btn-sm me-2" (click)="updateStatutpermission(permission.id, 2)">Refuser</button>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

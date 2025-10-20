@@ -1,0 +1,62 @@
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h4>Suivi des Proforma</h4>
+    </div>
+  </div>
+
+  <div class="card border-0">
+    <div class="card-body">
+      <div *ngIf="isLoading" class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && suiviList.length === 0" class="text-center text-muted py-4">
+        Aucune Proforma à suivre.
+      </div>
+
+      <div *ngIf="!isLoading && suiviList.length > 0" class="table-responsive">
+        <table id="suiviTable" class="table table-striped table-bordered w-100">
+          <thead>
+            <tr>
+              <th>Nom & Prenom</th>
+              <th>Date de Saisie</th>
+              <th>Lieu</th>
+             <th>Date de Depart</th>
+              <!-- <th>Montant(en chiffre)</th> -->
+              <th>Total</th>
+              <th>Statut</th>
+              <th>Etabile par</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of suiviList">
+              <td>{{ d.nom_prenom }}</td>
+              <td>{{ d.date | date:'dd-MM-yyyy' }}</td>
+              <td>{{ d.lieu }}</td>
+              <td>{{ d.debut | date:'dd-MM-yyyy' }}</td>
+              <td class="text-end">{{ d.totale | number:'1.2-2' }}</td>
+              <td class="text-center">
+                <span class="badge" [class]="getStatusBadgeClass(d.status)">
+                  {{ d.status }}
+                </span>
+              </td>
+              <td>{{ d.nom_prenom}}</td>
+              <td>
+                <button class="btn btn-info btn-sm me-1"
+                          (click)="getPdfUrl(d.id)"
+                          title="Ouvrir la Proforma">
+                    <i class="fas fa-file-pdf"></i>
+                  </button>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
